@@ -1,0 +1,3193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="人间太坏了修仙吧：轻松的修仙放置小游戏，钓鱼、种药、炼丹、抽卡、突破境界。">
+<title>人间太坏了修仙吧</title>
+<style>
+  :root{
+    --bg:#f4f2ee;
+    --card:#ffffff;
+    --ink:#2b2a28;
+    --ink-2:#6f6a61;
+    --accent:#8a4b3a;
+    --accent-2:#b06a4f;
+    --gold:#b8860b;
+    --green:#4e7a3a;
+    --line:#e5e0d6;
+    --shadow:0 4px 16px rgba(70,55,40,.08);
+    --radius:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:"Kaiti SC","KaiTi","STKaiti","STSong","SimSun","Songti SC",serif;
+    background:#eae7e1;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    overflow:hidden;
+    font-variant-numeric:tabular-nums;
+  }
+  #app{
+    width:100%;
+    max-width:640px;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    flex-direction:column;
+    background:var(--bg);
+    box-shadow:0 0 40px rgba(0,0,0,.06);
+  }
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    border:none;
+    user-select:none;
+    touch-action:manipulation;
+    color:inherit;
+  }
+  button:disabled{cursor:not-allowed;}
+
+  /* ---------- Header ---------- */
+  header{
+    flex-shrink:0;
+    background:linear-gradient(180deg,#fbfaf7,#f6f3ec);
+    border-bottom:1px solid var(--line);
+    padding:12px 16px 10px;
+  }
+  .realm-line{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+  #realmName{font-size:1.45rem;font-weight:bold;letter-spacing:1px;}
+  #layerName{font-size:1.1rem;color:var(--accent);font-weight:bold;}
+  .realm-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .badge{
+    padding:3px 12px;
+    border-radius:999px;
+    font-size:.85rem;
+    font-weight:bold;
+    background:#fff;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    white-space:nowrap;
+  }
+  .root-天灵根{color:#a86a00;border-color:#e6c069;background:#fff8e6;}
+  .root-变异灵根{color:#7a4fb0;border-color:#d3b9ec;background:#f7f0ff;}
+  .root-双灵根{color:#2f6f9f;border-color:#b7d6e8;background:#eef7fc;}
+  .root-伪灵根{color:#6c665d;border-color:#d8d2c8;background:#f6f4f0;}
+  .help-btn{
+    width:34px;height:34px;border-radius:50%;
+    background:#fff;border:1px solid var(--line);
+    font-size:1.05rem;font-weight:bold;color:var(--ink-2);
+    box-shadow:var(--shadow);line-height:1;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .help-btn:active{transform:scale(.92);}
+  .speed-line{
+    display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;
+    margin-top:8px;font-size:.98rem;color:var(--ink-2);
+  }
+  .speed-line b{color:var(--ink);font-size:1.15rem;font-weight:bold;}
+  .speed{margin-left:auto;color:var(--accent);font-weight:bold;}
+  .progress-wrap{
+    margin-top:8px;height:12px;border-radius:999px;
+    background:#e7e2d8;overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.08);
+  }
+  #progress{
+    height:100%;width:0%;
+    background:linear-gradient(90deg,#c08a5a,#8a4b3a);
+    border-radius:999px;
+    transition:width .12s linear;
+  }
+  .header-stats{margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+  .hrow{display:flex;justify-content:space-between;align-items:baseline;font-size:.98rem;}
+  .hrow .hl{color:var(--ink-2);}
+  .hrow b{font-weight:bold;font-size:1.12rem;font-variant-numeric:tabular-nums;}
+  .hrow .hsub{color:var(--ink-2);font-size:.88rem;font-variant-numeric:tabular-nums;}
+  .hide-top-bar{display:none;} /* 顶部数值/进度条显隐：用 display 控制，绝不占位，避免抖动 */
+
+  /* ---------- 全局货币条（所有页面固定显示） ---------- */
+  .currency-bar{
+    display:flex;align-items:center;gap:10px;
+    margin-top:8px;
+    padding:7px 10px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#fffdf9;
+    font-size:.92rem;color:var(--ink-2);
+    box-shadow:0 2px 8px rgba(70,55,40,.04);
+  }
+  .currency-item{display:flex;align-items:baseline;gap:5px;}
+  .currency-item + .currency-item{margin-left:auto;padding-left:12px;border-left:1px dashed var(--line);}
+  .currency-item b{font-size:1.05rem;color:var(--ink);font-variant-numeric:tabular-nums;}
+  .currency-item.jade b{color:#2f6f9f;}
+
+  /* ---------- 全局快捷入口 ---------- */
+  .quick-bar{display:flex;gap:8px;margin-top:8px;}
+  .quick-btn{
+    flex:1;min-height:34px;display:flex;align-items:center;justify-content:center;gap:7px;
+    border:1px solid var(--line);border-radius:10px;background:#fffdf9;
+    color:var(--ink-2);font-size:.88rem;font-weight:bold;
+    box-shadow:0 2px 8px rgba(70,55,40,.04);
+  }
+  .quick-btn:active{transform:scale(.98);}
+  .quick-btn.chance{color:var(--accent);border-color:#e6d2c9;background:#fff8f4;}
+  .quick-btn.shop{color:var(--green);border-color:#cfe0c4;background:#f7fbf3;}
+  .quick-count{
+    min-width:18px;height:18px;padding:0 5px;border-radius:999px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--accent);color:#fff;font-size:.72rem;line-height:1;
+  }
+
+  /* ---------- 炼丹进度 ---------- */
+  .alchemy-level-box{margin:0 0 12px;}
+  .alchemy-level-head{display:flex;justify-content:space-between;gap:8px;font-size:.9rem;color:var(--ink-2);margin-bottom:5px;}
+  .alchemy-level-head b{color:var(--accent);}
+  .alchemy-xp-bar{height:10px;border-radius:999px;background:#e7e2d8;overflow:hidden;}
+  .alchemy-xp-bar div{height:100%;background:linear-gradient(90deg,#7fa86b,#4e7a3a);border-radius:999px;transition:width .2s linear;}
+  .alchemy-run-bar{height:12px;border-radius:999px;background:#e7e2d8;overflow:hidden;margin:0 0 10px;}
+  .alchemy-run-bar div{height:100%;width:0%;background:linear-gradient(90deg,#c08a5a,#8a4b3a);border-radius:999px;transition:width .1s linear;}
+
+  /* ---------- 突破弹窗 ---------- */
+  .break-rate-box{padding:10px 12px;border-radius:12px;background:#faf6f0;border:1px solid var(--line);margin-bottom:10px;line-height:1.7;font-size:.95rem;}
+  .break-rate-box b{color:var(--accent);font-size:1.15rem;}
+  .break-rate-box .maxed{color:#b8860b;}
+  .break-pill-list{display:flex;flex-direction:column;gap:6px;margin:10px 0;}
+  .break-pill-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fbfaf7;font-size:.92rem;cursor:pointer;}
+  .break-pill-item input{width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;}
+  .break-pill-item.disabled{opacity:.42;filter:grayscale(1);cursor:not-allowed;}
+  .break-pill-item .pill-plus{margin-left:auto;color:var(--green);font-weight:bold;white-space:nowrap;}
+  .break-other{margin-top:8px;font-size:.82rem;color:var(--ink-2);line-height:1.6;}
+  .break-empty{padding:14px;text-align:center;color:var(--ink-2);font-size:.92rem;background:#fbfaf7;border:1px dashed var(--line);border-radius:10px;}
+
+  /* ---------- 悬浮提示 Toast ---------- */
+  #toastWrap{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:3000;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:420px;pointer-events:none;}
+  .toast{padding:12px 16px;border-radius:12px;font-size:.95rem;line-height:1.5;font-weight:bold;box-shadow:0 10px 30px rgba(0,0,0,.18);animation:toastIn .22s ease-out;pointer-events:auto;border:1px solid transparent;}
+  .toast.success{background:#eef8e8;color:#2f5f22;border-color:#b7d6a4;}
+  .toast.fail{background:#fff0f0;color:#9b2c2c;border-color:#e3b4b4;}
+  .toast.info{background:#fffaf0;color:#7a5a20;border-color:#e6c069;}
+  .toast.out{animation:toastOut .25s ease-in forwards;}
+  @keyframes toastIn{from{opacity:0;transform:translateY(-10px) scale(.98);}to{opacity:1;transform:none;}}
+  @keyframes toastOut{to{opacity:0;transform:translateY(-8px) scale(.98);}}
+
+  /* ---------- Main ---------- */
+  main{flex:1;min-height:0;overflow-y:auto;padding:12px;-webkit-overflow-scrolling:touch;}
+  .tab{display:none;}
+  .tab.active{display:block;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .card.center{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .hint{font-size:.86rem;color:var(--ink-2);margin:8px 0 0;text-align:center;line-height:1.6;}
+  .tag{font-size:.85rem;color:var(--gold);margin-top:8px;text-align:center;}
+  .sec-title{font-size:1.05rem;font-weight:bold;letter-spacing:1px;margin-bottom:10px;}
+
+  .btn{
+    min-height:48px;
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:1rem;
+    background:#fff;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    color:var(--ink);
+    transition:transform .08s ease, background .15s ease, opacity .15s;
+  }
+  .btn:active{transform:scale(.96);}
+  .btn:disabled{opacity:.45;box-shadow:none;}
+  .btn.primary{
+    background:linear-gradient(180deg,#9a5744,#7c4030);
+    color:#fff;border-color:#6f382a;
+    text-shadow:0 1px 1px rgba(0,0,0,.2);
+  }
+  .btn.green{
+    background:linear-gradient(180deg,#6f9a52,#4e7a3a);
+    color:#fff;border-color:#3f6530;
+    text-shadow:0 1px 1px rgba(0,0,0,.2);
+  }
+  .btn.big{
+    width:100%;
+    min-height:64px;
+    font-size:1.3rem;
+    letter-spacing:4px;
+    border-radius:16px;
+  }
+  .btn.small{min-height:40px;padding:6px 12px;font-size:.9rem;border-radius:10px;}
+  .btn.danger{color:#9b2c2c;border-color:#e3b4b4;background:#fff5f5;}
+
+  .stat-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:9px 0;border-bottom:1px dashed var(--line);font-size:.98rem;
+  }
+  .stat-row:last-child{border-bottom:none;}
+  .stat-row span{color:var(--ink-2);}
+  .stat-row b{font-weight:bold;}
+
+  .row-between{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+
+  /* ---------- 通用列表行 ---------- */
+  .fish-row{
+    display:grid;grid-template-columns:1fr auto auto auto;
+    gap:8px;align-items:center;padding:9px 0;
+    border-bottom:1px dashed var(--line);font-size:.95rem;
+  }
+  .fish-row:last-child{border-bottom:none;}
+  .fish-row.head{color:var(--ink-2);font-size:.82rem;border-bottom:1px solid var(--line);}
+  .fish-name{font-weight:bold;}
+  .fish-name.rare{color:var(--gold);}
+  .fish-price{color:var(--ink-2);font-size:.85rem;text-align:right;}
+
+  /* ---------- 商店 ---------- */
+  .shop-group-title{
+    margin:16px 0 2px;padding-top:12px;border-top:1px solid var(--line);
+    font-size:.9rem;font-weight:bold;color:var(--accent);letter-spacing:1px;
+  }
+  .shop-group-title:first-child{margin-top:0;padding-top:0;border-top:none;}
+  .shop-item{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:12px 0;border-bottom:1px dashed var(--line);
+  }
+  .shop-item:last-child{border-bottom:none;}
+  .shop-name{font-size:1.05rem;font-weight:bold;display:flex;align-items:center;gap:6px;}
+  .shop-desc{font-size:.84rem;color:var(--ink-2);margin-top:3px;line-height:1.5;}
+  .shop-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;}
+  .shop-price{font-size:.86rem;color:var(--accent);font-weight:bold;white-space:nowrap;}
+
+  /* ---------- 药园 ---------- */
+  .plot{
+    border:1px dashed var(--line);border-radius:12px;
+    padding:12px;margin-bottom:10px;background:#fbfaf7;
+  }
+  .plot:last-child{margin-bottom:0;}
+  .plot.mature{border-color:#c9a24a;background:#fdf9ee;}
+  .plot-name{font-size:.98rem;font-weight:bold;margin-bottom:8px;}
+  .plot-actions{display:flex;flex-wrap:wrap;gap:8px;}
+  .plot-actions .btn{flex:1;min-width:0;font-size:.82rem;min-height:44px;padding:8px 6px;}
+  @media (max-width:460px){
+    .plot-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
+    .plot-actions .btn{width:100%;}
+    .plot-actions .btn:only-child{grid-column:1 / -1;}
+  }
+  .plot-progress{height:8px;border-radius:999px;background:#e7e2d8;overflow:hidden;margin-bottom:6px;}
+  .plot-progress div{height:100%;background:linear-gradient(90deg,#7fa86b,#4e7a3a);border-radius:999px;transition:width .5s linear;}
+  .plot-remaining{font-size:.85rem;color:var(--ink-2);}
+
+  /* ---------- 丹房 ---------- */
+  .recipe-item{
+    border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fbfaf7;
+  }
+  .recipe-item:last-child{margin-bottom:0;}
+  .recipe-info{flex:1;min-width:0;}
+  .recipe-name{font-weight:bold;font-size:1.02rem;}
+  .recipe-desc{font-size:.84rem;color:var(--ink-2);margin-top:3px;line-height:1.5;}
+  .recipe-rate{font-size:.85rem;color:var(--accent);font-weight:bold;}
+  .pill-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);}
+  .pill-row:last-child{border-bottom:none;}
+  .pill-info{flex:1;min-width:0;}
+  .pill-name{font-weight:bold;}
+  .pill-note{font-size:.82rem;color:var(--ink-2);margin-top:2px;}
+  .pill-count{font-weight:bold;white-space:nowrap;}
+
+  /* ---------- 日志 ---------- */
+  #log-panel{
+    flex-shrink:0;
+    background:#efece4;
+    border-top:1px solid var(--line);
+    max-height:70px;
+    overflow-y:auto;
+    padding:6px 12px;
+    font-size:.78rem;
+    color:var(--ink-2);
+    -webkit-overflow-scrolling:touch;
+  }
+  #log{line-height:1.55;}
+  .log-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* ---------- 导航 ---------- */
+  #bottomnav{
+    flex-shrink:0;
+    display:flex;
+    background:#fff;
+    border-top:1px solid var(--line);
+  }
+  .nav-btn{
+    flex:1;min-height:58px;
+    font-size:.92rem;
+    letter-spacing:0;
+    background:transparent;
+    color:var(--ink-2);
+    border-right:1px solid var(--line);
+    padding:0 2px;
+  }
+  .nav-btn:last-child{border-right:none;}
+  .nav-btn.active{color:var(--accent);font-weight:bold;background:#faf6f0;}
+
+  /* ---------- 弹窗 ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:2000;
+    background:rgba(20,16,12,.5);
+    display:none;align-items:center;justify-content:center;
+    padding:16px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-box{
+    width:100%;max-width:460px;
+    background:#fff;border-radius:var(--radius);
+    box-shadow:0 24px 70px rgba(0,0,0,.35);
+    padding:18px;max-height:92vh;overflow-y:auto;
+  }
+  .modal-title{font-size:1.2rem;font-weight:bold;letter-spacing:2px;margin-bottom:12px;color:var(--ink);}
+  .modal-body textarea{
+    width:100%;min-height:150px;
+    font-family:Consolas,Menlo,"Courier New",monospace;
+    font-size:.82rem;line-height:1.5;
+    border:1px solid var(--line);border-radius:10px;
+    padding:10px;resize:vertical;
+    background:#faf8f4;color:var(--ink);
+    word-break:break-all;white-space:pre-wrap;
+  }
+  .modal-body textarea:focus{outline:none;border-color:var(--accent-2);}
+  .modal-body .hint{margin-top:8px;}
+  .modal-footer{
+    display:flex;gap:10px;margin-top:14px;
+    position:sticky;bottom:0;z-index:2;
+    background:#fff;padding:10px 0 2px;
+    border-top:1px solid var(--line);
+  }
+  .modal-footer .btn{flex:1;}
+
+  /* ---------- 商店 / 机缘底部抽屉 ---------- */
+  .sheet-overlay{
+    position:fixed;inset:0;z-index:1800;
+    background:rgba(20,16,12,.42);
+    display:none;align-items:flex-end;justify-content:center;
+  }
+  .sheet-overlay.open{display:flex;animation:fadeIn .16s ease-out;}
+  .sheet-box{
+    width:100%;max-width:640px;max-height:88vh;max-height:88dvh;
+    display:flex;flex-direction:column;
+    background:var(--bg);
+    border-radius:22px 22px 0 0;
+    box-shadow:0 -18px 60px rgba(0,0,0,.28);
+    animation:sheetUp .24s cubic-bezier(.2,.8,.3,1);
+    overflow:hidden;
+  }
+  .sheet-head{
+    flex-shrink:0;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 18px 10px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#fffdf9,#fbf8f2);
+  }
+  .sheet-title{font-size:1.08rem;font-weight:bold;letter-spacing:2px;}
+  .sheet-sub{font-size:.78rem;color:var(--ink-2);margin-top:2px;letter-spacing:0;}
+  .sheet-close{
+    width:34px;height:34px;border-radius:50%;border:1px solid var(--line);
+    background:#fff;color:var(--ink-2);font-size:1.2rem;line-height:1;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .sheet-body{
+    flex:1;min-height:0;overflow-y:auto;padding:12px;
+    -webkit-overflow-scrolling:touch;
+  }
+  #sheetBody .tab{display:block;}
+  #sheetBody .card:first-child{margin-top:0;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes sheetUp{from{transform:translateY(28px);opacity:.6;}to{transform:none;opacity:1;}}
+
+  .sell-box{display:flex;flex-direction:column;gap:12px;}
+  .sell-line{font-size:.95rem;color:var(--ink-2);}
+  .sell-qty{display:flex;align-items:center;gap:8px;}
+  .sell-qty .btn{min-height:42px;min-width:44px;flex:0 0 auto;padding:6px 10px;}
+  .sell-qty input{
+    flex:1;min-width:56px;text-align:center;
+    height:42px;font-size:1.1rem;font-weight:bold;
+    border:1px solid var(--line);border-radius:10px;background:#faf8f4;color:var(--ink);
+  }
+  .sell-qty input:focus{outline:none;border-color:var(--accent-2);}
+  .sell-total{font-size:1rem;text-align:center;}
+  .sell-total b{color:var(--accent);font-size:1.15rem;}
+  .battle-box{display:flex;flex-direction:column;gap:10px;font-size:1rem;line-height:1.7;}
+  .battle-line{color:var(--ink);}
+  .battle-rate{color:var(--accent);font-size:1.2rem;}
+  .battle-warn{color:#b0662a;font-weight:bold;font-size:.9rem;}
+  .result-box{font-size:1.02rem;line-height:1.8;color:var(--ink);text-align:center;padding:6px 0;}
+  .gacha-rates{font-size:.82rem;color:var(--ink-2);margin-bottom:4px;line-height:1.5;}
+  .gacha-pity{font-size:.9rem;color:var(--ink-2);margin-top:6px;}
+  .gacha-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .gacha-btns .btn{flex:1;min-width:0;font-size:.85rem;}
+  .gacha-info-link{
+    margin-top:9px;padding:8px 0 2px;border-top:1px dashed var(--line);
+    width:100%;background:none;border-left:none;border-right:none;border-bottom:none;
+    text-align:left;color:var(--ink-2);font-size:.82rem;letter-spacing:.5px;
+  }
+  .gacha-info-link:active{color:var(--accent);}
+  .gacha-info-pool{padding:2px 0 14px;margin-bottom:14px;border-bottom:1px dashed var(--line);}
+  .gacha-info-pool:last-child{margin-bottom:0;border-bottom:none;padding-bottom:0;}
+  .gacha-info-name{font-size:1.02rem;font-weight:bold;margin-bottom:5px;letter-spacing:1px;}
+  .gacha-info-rate{font-size:.86rem;color:var(--accent);font-weight:bold;line-height:1.6;}
+  .gacha-info-pity{font-size:.78rem;color:var(--ink-2);line-height:1.7;margin:3px 0 8px;}
+  .gacha-info-tip{font-size:.76rem;color:var(--ink-2);margin-top:6px;line-height:1.5;}
+  .gacha-collection{display:flex;flex-wrap:wrap;gap:6px;}
+  .gacha-tag{font-size:.82rem;padding:3px 10px;border-radius:999px;background:#faf6f0;border:1px solid var(--line);}
+  .gacha-result{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto;}
+  .gacha-line{font-size:.95rem;padding:6px 8px;border-radius:8px;background:#faf8f4;line-height:1.5;}
+  .gacha-line.r-普通{color:var(--ink);}
+  .gacha-line.r-优品{color:#2f6f9f;font-weight:bold;}
+  .gacha-line.r-极品{color:#c77d00;font-weight:bold;background:#fff6e0;}
+  .gacha-line.r-稀品{color:#8a5a00;font-weight:bold;background:linear-gradient(90deg,#fff8e1,#fff0bf);border:1px solid #e6c069;}
+  .gacha-item{cursor:pointer;}
+  /* 品阶配色：普通灰 / 优品蓝 / 极品紫 / 金色稀品 */
+  .g-r-普通{color:#8a847b;}
+  .g-r-优品{color:#2f6f9f;}
+  .g-r-极品{color:#7a4fb0;}
+  .g-r-稀品{color:#b8860b;font-weight:bold;}
+  .g-unowned{opacity:.35;filter:grayscale(1);}
+  .gacha-tag.owned{background:#fdf9ee;border-color:#c9a24a;}
+  .gacha-tag.g-r-稀品.owned{background:#fff8e6;border-color:#e6c069;}
+  .col-group{margin-bottom:10px;}
+  .col-group:last-child{margin-bottom:0;}
+  .col-group-title{font-weight:bold;font-size:.92rem;margin-bottom:6px;letter-spacing:1px;}
+  .pool-preview{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;}
+  .pool-preview-title{font-size:.85rem;color:var(--ink-2);margin-bottom:6px;}
+  .gacha-tip{
+    position:fixed;
+    display:none;
+    z-index:2500;
+    max-width:220px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    padding:10px 12px;
+    font-size:.85rem;
+    line-height:1.5;
+    pointer-events:auto;
+  }
+  .gacha-tip.show{display:block;}
+  .gacha-tip-name{font-weight:bold;font-size:.9rem;}
+  .gacha-tip-rarity{color:var(--accent);font-weight:bold;}
+  .gacha-tip-effect{color:var(--ink-2);margin-top:3px;}
+
+  /* ---------- 说明面板 ---------- */
+  .help-box{font-size:.9rem;line-height:1.7;color:var(--ink);}
+  .help-sec{margin-bottom:14px;}
+  .help-title{font-weight:bold;font-size:1rem;color:var(--accent);margin-bottom:4px;letter-spacing:1px;border-left:3px solid var(--accent);padding-left:8px;}
+  .help-row{padding:2px 0;}
+
+  /* ---------- 渡劫特效 ---------- */
+  #tribOverlay{
+    position:fixed;inset:0;z-index:1000;
+    pointer-events:none;opacity:0;
+    background:radial-gradient(circle at 50% 20%,#2a2f4a 0%,#0c0d1a 55%,#05050c 100%);
+    transition:opacity .25s ease;
+    overflow:hidden;
+  }
+  #tribOverlay.show{opacity:1;}
+  #tribOverlay .flash{
+    position:absolute;inset:0;background:#fff;opacity:0;
+  }
+  #tribOverlay.show .flash{animation:flash 2.2s ease-out forwards;}
+  .trib-title{
+    position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
+    font-size:4rem;letter-spacing:.6em;color:#e8f3ff;
+    text-shadow:0 0 30px #7fc4ff,0 0 60px #3d8bff;
+    opacity:0;white-space:nowrap;
+  }
+  #tribOverlay.show .trib-title{animation:tribtext 2.2s ease-out forwards;}
+  .bolt{position:absolute;top:-20px;filter:drop-shadow(0 0 10px #bfe6ff) drop-shadow(0 0 24px #6db5ff);}
+  #tribOverlay.show .bolt{animation:boltflicker 2.2s ease-out forwards;}
+  .b1{left:12%;width:120px;}
+  .b2{left:44%;width:150px;animation-delay:.1s !important;}
+  .b3{left:74%;width:110px;animation-delay:.25s !important;}
+
+  @keyframes flash{
+    0%,100%{opacity:0;}
+    6%{opacity:.95;}
+    12%{opacity:.08;}
+    22%{opacity:.85;}
+    30%{opacity:.05;}
+    46%{opacity:.7;}
+    55%{opacity:.08;}
+    100%{opacity:0;}
+  }
+  @keyframes tribtext{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.7);}
+    12%{opacity:1;transform:translate(-50%,-50%) scale(1.18);}
+    45%{opacity:1;transform:translate(-50%,-50%) scale(1);}
+    80%{opacity:1;}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.08);}
+  }
+  @keyframes boltflicker{
+    0%,100%{opacity:0;}
+    5%{opacity:1;}
+    9%{opacity:.15;}
+    14%{opacity:1;}
+    20%{opacity:0;}
+    55%{opacity:.95;}
+    60%{opacity:0;}
+    72%{opacity:1;}
+    78%{opacity:0;}
+  }
+
+  @media (min-width:641px){
+    #app{border-left:1px solid var(--line);border-right:1px solid var(--line);}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="realm-line">
+      <span id="realmName">炼气期</span>
+      <span id="layerName">一层</span>
+      <div class="realm-right">
+        <span id="spiritRoot" class="badge">—</span>
+        <button id="helpBtn" class="help-btn" aria-label="游戏说明">？</button>
+      </div>
+    </div>
+    <div class="currency-bar">
+      <span class="currency-item">灵石 <b id="stones">0</b></span>
+      <span class="currency-item jade">灵玉 <b id="jade">0</b></span>
+    </div>
+    <div class="quick-bar">
+      <button id="quickChanceBtn" class="quick-btn chance">✦ 机缘 <span id="quickChanceCount" class="quick-count">3</span></button>
+      <button id="quickShopBtn" class="quick-btn shop">⌂ 商店</button>
+    </div>
+    <div id="topStats">
+      <div class="progress-wrap"><div id="progress"></div></div>
+      <div class="header-stats">
+        <div class="hrow"><span class="hl">修为</span><div><b id="cultivation">0</b><span class="hsub"> / <span id="cultCap">100</span></span></div></div>
+        <div class="hrow"><span class="hl">每秒</span><b id="speed">0</b></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 修炼 -->
+    <section id="tab-cultivate" class="tab active">
+      <div class="card center">
+        <button id="breakBtn" class="btn primary big">突破</button>
+        <p id="breakHint" class="hint"></p>
+        <p id="overflowHint" class="hint" style="color:#95511f;display:none;">修为已溢出上限，修炼速度减半</p>
+      </div>
+      <div class="card">
+        <div class="stat-row"><span>灵根</span><b id="rootName">—</b></div>
+        <div class="stat-row"><span>灵根效果</span><b id="rootBonus">—</b></div>
+        <div class="stat-row"><span>本境界破境丹</span><b><span id="pojingCount">0</span> 枚</b></div>
+        <div class="stat-row"><span>护道符</span><b><span id="hudaofuCount">0</span> 张</b></div>
+        <div class="stat-row"><span>悟道茶</span><b id="teaStatus">未服用</b></div>
+        <div class="stat-row"><span>造化丹</span><b id="zaohuaStatus">未服用</b></div>
+        <div class="stat-row"><span>洗髓保底</span><b id="xisuiProgress">0/20</b></div>
+      </div>
+    </section>
+
+    <!-- 钓鱼 -->
+    <section id="tab-fishing" class="tab">
+      <div class="card">
+        <div class="row-between">
+          <span class="sec-title" style="margin:0;">垂钓</span>
+          <button id="sellAllBtn" class="btn small">一键出售常规鱼</button>
+        </div>
+        <button id="fishBtn" class="btn primary big">开始钓鱼</button>
+        <p id="fishProgress" class="hint"></p>
+        <div id="luckyRodTag" class="tag"></div>
+      </div>
+      <div class="card"><div id="fishList"></div></div>
+    </section>
+
+    <!-- 药园 -->
+    <section id="tab-garden" class="tab">
+      <div class="card">
+        <div class="row-between">
+          <span class="sec-title" style="margin:0;">药园（3 块灵田）</span>
+          <button id="gardenShopBtn" class="btn small">购买种子</button>
+        </div>
+        <p class="hint" style="text-align:left;">种植消耗 1 颗对应种子，种子可在商店购买。</p>
+        <div id="gardenPlots"></div>
+      </div>
+      <div class="card">
+        <div class="row-between">
+          <span class="sec-title" style="margin:0;">草药库存</span>
+          <button id="sellAllHerbsBtn" class="btn small">全部出售</button>
+        </div>
+        <div id="herbList"></div>
+      </div>
+    </section>
+
+    <!-- 丹房 -->
+    <section id="tab-alchemy" class="tab">
+      <div class="card">
+        <div class="sec-title">炼丹炉</div>
+        <div id="alchemyLevelBox" class="alchemy-level-box"></div>
+        <p id="alchemyStatus" class="hint" style="text-align:left;margin:0 0 10px;"></p>
+        <div id="alchemyRunBar" class="alchemy-run-bar" style="display:none;"><div id="alchemyRunFill"></div></div>
+        <div id="recipeList"></div>
+      </div>
+      <div class="card">
+        <div class="sec-title">丹药背包</div>
+        <div id="pillList"></div>
+      </div>
+    </section>
+
+    <!-- 商店 -->
+    <section id="tab-shop" class="tab">
+      <div class="card">
+        <div class="sec-title">每日签到</div>
+        <button id="signBtn" class="btn green big">每日签到</button>
+        <p id="signHint" class="hint">连续签到 0 天</p>
+      </div>
+      <div class="card">
+        <div class="sec-title">商城</div>
+        <div id="shopList"></div>
+      </div>
+      <div class="card">
+        <div class="row-between">
+          <span class="sec-title" style="margin:0;">鱼篓速卖</span>
+          <button id="shopSellFishBtn" class="btn small">一键出售常规鱼</button>
+        </div>
+        <p class="hint" style="text-align:left;">只出售常规鱼，灵玉鱼与龙鳞鱼会被永久保留。</p>
+      </div>
+      <div class="card">
+        <div class="sec-title">存档管理</div>
+        <div style="display:flex;gap:10px;">
+          <button id="exportBtn" class="btn" style="flex:1;">导出存档</button>
+          <button id="importBtn" class="btn" style="flex:1;">导入存档</button>
+        </div>
+        <p class="hint">导出后可保存到云端或其他设备，跨设备恢复进度。</p>
+      </div>
+      <div class="card center">
+        <button id="resetBtn" class="btn danger">重置存档（重新开始）</button>
+        <p class="hint">进度每 5 秒自动保存，关闭页面后重新打开可继续修行。</p>
+      </div>
+    </section>
+
+    <!-- 机缘 -->
+    <section id="tab-chance" class="tab">
+      <div class="card">
+        <div class="sec-title">机缘（随机事件）</div>
+        <div class="stat-row"><span>剩余机会</span><b><span id="chanceCount">0</span> / 3</b></div>
+        <div class="stat-row"><span>下次刷新</span><b id="chanceCountdown">--</b></div>
+      </div>
+      <div class="card center">
+        <button id="chanceBtn" class="btn primary big">触发机缘</button>
+        <p class="hint">每 1 小时刷新 3 次机会。触发随机遭遇奇遇、陷阱或战斗，每次消耗 1 次机会。</p>
+      </div>
+    </section>
+
+    <!-- 抽卡 -->
+    <section id="tab-gacha" class="tab">
+      <div class="card">
+        <div class="row-between">
+          <span class="sec-title" style="margin:0;">加成总览</span>
+          <button id="gachaInfoBtn" class="btn small">概率与图鉴</button>
+        </div>
+        <div class="stat-row"><span>修炼速度</span><b id="bonusCult">+0%</b></div>
+        <div class="stat-row"><span>突破率</span><b id="bonusBreak">+0%</b></div>
+        <div class="stat-row"><span>钓鱼概率</span><b id="bonusFish">+0%</b></div>
+        <div class="stat-row"><span>炼丹概率</span><b id="bonusAlch">+0%</b></div>
+      </div>
+      <div id="gachaPools"></div>
+      <div class="card" id="gachaColCard" style="position:relative;">
+        <div class="row-between">
+          <span class="sec-title" style="margin:0;">图鉴</span>
+          <button id="gachaCollectionBtn" class="btn small">查看完整图鉴</button>
+        </div>
+        <p id="gachaCollectionSummary" class="hint" style="text-align:left;"></p>
+        <div id="gachaTip" class="gacha-tip"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="log-panel"><div id="log"></div></div>
+
+  <nav id="bottomnav">
+    <button class="nav-btn active" data-tab="cultivate">修 炼</button>
+    <button class="nav-btn" data-tab="fishing">钓 鱼</button>
+    <button class="nav-btn" data-tab="garden">药 园</button>
+    <button class="nav-btn" data-tab="alchemy">丹 房</button>
+    <button class="nav-btn" data-tab="gacha">抽 卡</button>
+  </nav>
+</div>
+
+<!-- 渡劫全屏特效 -->
+<div id="tribOverlay">
+  <div class="flash"></div>
+  <svg class="bolt b1" viewBox="0 0 100 260">
+    <polyline points="50,0 28,72 46,72 20,146 42,146 14,232 40,232 30,260"
+      fill="none" stroke="#d9f3ff" stroke-width="4" stroke-linejoin="round"/>
+  </svg>
+  <svg class="bolt b2" viewBox="0 0 100 300">
+    <polyline points="70,0 48,64 64,64 38,140 58,140 30,220 52,220 44,300"
+      fill="none" stroke="#d9f3ff" stroke-width="5" stroke-linejoin="round"/>
+  </svg>
+  <svg class="bolt b3" viewBox="0 0 100 220">
+    <polyline points="30,0 12,55 28,55 6,120 24,120 0,190 22,190 14,220"
+      fill="none" stroke="#d9f3ff" stroke-width="4" stroke-linejoin="round"/>
+  </svg>
+  <div class="trib-title">渡 劫</div>
+</div>
+
+<!-- 悬浮提示 -->
+<div id="toastWrap"></div>
+
+<!-- 存档导出/导入弹窗 -->
+<div id="modal" class="modal-overlay">
+  <div class="modal-box">
+    <div id="modal-title" class="modal-title"></div>
+    <div id="modal-body" class="modal-body"></div>
+    <div id="modal-footer" class="modal-footer"></div>
+  </div>
+</div>
+
+<!-- 商店 / 机缘底部抽屉 -->
+<div id="sheet" class="sheet-overlay" aria-hidden="true">
+  <div class="sheet-box">
+    <div class="sheet-head">
+      <div>
+        <div id="sheetTitle" class="sheet-title">商店</div>
+        <div id="sheetSub" class="sheet-sub"></div>
+      </div>
+      <button id="sheetCloseBtn" class="sheet-close" aria-label="关闭">×</button>
+    </div>
+    <div id="sheetBody" class="sheet-body"></div>
+  </div>
+</div>
+
+<script>
+/* ================= 数据定义 ================= */
+const REALMS = ['炼气期','筑基期','金丹期','元婴期','化神期','炼虚期','合体期','大乘期','渡劫期',
+                '散仙','真仙','玄仙','金仙','太乙金仙','大罗金仙','准圣','圣人','道祖'];
+const LAYERS = ['一','二','三','四','五','六','七','八','九'];
+
+// 灵根概率：天5% / 变异15% / 双30% / 伪50%
+const ROOT_TABLE = [
+  {name:'天灵根',   speed:1.5, bonus:5,  w:5},
+  {name:'变异灵根', speed:1.3, bonus:0,  w:15},
+  {name:'双灵根',   speed:1.1, bonus:0,  w:30},
+  {name:'伪灵根',   speed:0.9, bonus:0,  w:50}
+];
+
+const FISH = [
+  {name:'青鱼',     price:5,     w:50,   rare:false},
+  {name:'草鱼',     price:10,    w:30,   rare:false},
+  {name:'锦鲤',     price:50,    w:15,   rare:true},
+  {name:'灵鲫',     price:200,   w:4,    rare:true},
+  {name:'金鳞鱼',   price:1000,  w:0.8,  rare:true},
+  {name:'龙鱼',     price:5000,  w:0.2,  rare:true},
+  {name:'五彩神鱼', price:50000, w:0.01, rare:true},
+  {name:'灵玉鱼',   price:1,     w:0.5,  rare:true, currency:'jade'}, // 基础概率 0.5%
+  {name:'龙鳞鱼',   price:100,   w:0.001, rare:true, currency:'jade'}
+];
+
+// 药园：名称、成熟时间(秒)、售价(灵石)
+const HERBS = [
+  {name:'聚灵草', grow:300,   sell:20,   seedPrice:4},
+  {name:'玄元花', grow:1800,  sell:150,  seedPrice:30},
+  {name:'九叶莲', grow:7200,  sell:800,  seedPrice:160},
+  {name:'龙涎草', grow:21600, sell:3000, seedPrice:600,  advanced:true},  // 6 小时
+  {name:'九转莲', grow:28800, sell:8000, seedPrice:1600, advanced:true}   // 8 小时
+];
+
+// 钓鱼竿：加法叠加，每种限购 1 根（买过就不再显示购买按钮）
+// bonus = 稀有鱼概率加成（百分点，直接相加）；jadeBonus = 灵玉鱼概率额外加成
+const RODS = [
+  {id:'lucky',  name:'幸运鱼竿', price:50000,   bonus:0.5, desc:'稀有鱼概率 +0.5%'},
+  {id:'silver', name:'玄铁鱼竿', price:200000,  bonus:1.0, desc:'稀有鱼概率 +1.0%'},
+  {id:'gold',   name:'灵金鱼竿', price:500000,  bonus:1.5, desc:'稀有鱼概率 +1.5%'},
+  {id:'myth',   name:'神木鱼竿', price:1000000, bonus:2.0, desc:'稀有鱼概率 +2.0%'},
+  {id:'jade',   name:'灵玉鱼竿', price:2000000, bonus:0,   jadeBonus:0.5, desc:'灵玉鱼概率额外 +0.5%'},
+  {id:'rarejade', name:'稀有灵玉鱼竿', price:10000000, bonus:0, jadeBonus:1.0, desc:'灵玉鱼概率额外 +1.0%'}
+];
+
+// 抽卡：标准化模板（池子 / 物品 / 保底 / 重复转化）
+const GACHA_RARITIES = ['普通','优品','极品','稀品'];
+const DUPE_CONVERT = {
+  stone: {'普通':2000, '优品':8000, '极品':30000, '稀品':120000},
+  jade:  {'普通':1,    '优品':3,    '极品':10,    '稀品':50}
+};
+const GACHA_POOLS = [
+  {
+    id:'normal', name:'普通灵石池', currency:'stone',
+    cost:10000, tenCost:100000, freeDaily:true,
+    pity:60, pityRarity:'优品',
+    pity2:120, pity2Rarity:'极品',   // 120 抽保底必出极品
+    rarityRates:{'普通':0.89, '优品':0.10, '极品':0.01},  // 总和 100%
+    items:[
+      {id:'n_fs1', name:'凡铁剑',   type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.2},
+      {id:'n_fs2', name:'青竹剑',   type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.2},
+      {id:'n_gj1', name:'吐纳诀',   type:'古籍', rarity:'普通', bonusType:'breakthrough', bonus:0.1},
+      {id:'n_gj2', name:'静心经',   type:'古籍', rarity:'普通', bonusType:'breakthrough', bonus:0.1},
+      {id:'n_ts1', name:'灵鱼饵',   type:'特殊', rarity:'普通', bonusType:'fishing',      bonus:0.1},
+      {id:'n_ts2', name:'灵火种',   type:'特殊', rarity:'普通', bonusType:'alchemy',      bonus:0.1},
+      // 新增 20 件普通
+      {id:'n_p01', name:'粗麻道袍', type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.1},
+      {id:'n_p02', name:'桃木剑',   type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.1},
+      {id:'n_p03', name:'铜铃铛',   type:'特殊', rarity:'普通', bonusType:'fishing',      bonus:0.1},
+      {id:'n_p04', name:'朱砂符',   type:'特殊', rarity:'普通', bonusType:'fishing',      bonus:0.1},
+      {id:'n_p05', name:'引灵香',   type:'特殊', rarity:'普通', bonusType:'alchemy',      bonus:0.1},
+      {id:'n_p06', name:'木药臼',   type:'特殊', rarity:'普通', bonusType:'alchemy',      bonus:0.1},
+      {id:'n_p07', name:'松纹古卷', type:'古籍', rarity:'普通', bonusType:'breakthrough', bonus:0.1},
+      {id:'n_p08', name:'清心玉佩', type:'法器', rarity:'普通', bonusType:'breakthrough', bonus:0.1},
+      {id:'n_p09', name:'青石护腕', type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.1},
+      {id:'n_p10', name:'竹编鱼篓', type:'特殊', rarity:'普通', bonusType:'fishing',      bonus:0.1},
+      {id:'n_p11', name:'火折子',   type:'特殊', rarity:'普通', bonusType:'alchemy',      bonus:0.1},
+      {id:'n_p12', name:'小还丹方', type:'古籍', rarity:'普通', bonusType:'breakthrough', bonus:0.1},
+      {id:'n_p13', name:'凝神香',   type:'特殊', rarity:'普通', bonusType:'breakthrough', bonus:0.1},
+      {id:'n_p14', name:'铁胎弓',   type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.1},
+      {id:'n_p15', name:'流云靴',   type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.1},
+      {id:'n_p16', name:'聚灵阵盘', type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.1},
+      {id:'n_p17', name:'寒玉枕',   type:'法器', rarity:'普通', bonusType:'breakthrough', bonus:0.1},
+      {id:'n_p18', name:'金线鱼线', type:'特殊', rarity:'普通', bonusType:'fishing',      bonus:0.1},
+      {id:'n_p19', name:'丹砂',     type:'特殊', rarity:'普通', bonusType:'alchemy',      bonus:0.1},
+      {id:'n_p20', name:'兽皮甲',   type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.1},
+      {id:'n_fs3', name:'玄铁飞剑', type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.2},
+      {id:'n_gj3', name:'玄元心经', type:'古籍', rarity:'优品', bonusType:'breakthrough', bonus:0.1},
+      {id:'n_ts3', name:'金蚕丝线', type:'特殊', rarity:'优品', bonusType:'fishing',      bonus:0.1},
+      {id:'n_ts4', name:'三昧真火', type:'特殊', rarity:'优品', bonusType:'alchemy',      bonus:0.1},
+      // 新增 10 件优品
+      {id:'n_y01', name:'赤炎剑',   type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.3},
+      {id:'n_y02', name:'碧水剑',   type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.3},
+      {id:'n_y03', name:'紫芝丹方', type:'古籍', rarity:'优品', bonusType:'alchemy',      bonus:0.3},
+      {id:'n_y04', name:'太清静心诀', type:'古籍', rarity:'优品', bonusType:'breakthrough', bonus:0.3},
+      {id:'n_y05', name:'玄龟甲',   type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.3},
+      {id:'n_y06', name:'灵蚕丝线', type:'特殊', rarity:'优品', bonusType:'fishing',      bonus:0.3},
+      {id:'n_y07', name:'地火炉',   type:'特殊', rarity:'优品', bonusType:'alchemy',      bonus:0.3},
+      {id:'n_y08', name:'破障符',   type:'特殊', rarity:'优品', bonusType:'breakthrough', bonus:0.3},
+      {id:'n_y09', name:'追风靴',   type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.3},
+      {id:'n_y10', name:'寒潭鱼饵', type:'特殊', rarity:'优品', bonusType:'fishing',      bonus:0.3},
+      {id:'n_jp1', name:'赤霄神剑', type:'法器', rarity:'极品', bonusType:'cultivation',  bonus:0.5},
+      {id:'n_jp2', name:'天罡道典', type:'古籍', rarity:'极品', bonusType:'breakthrough', bonus:0.3}
+    ]
+  },
+  {
+    id:'premium', name:'高级灵玉池', currency:'jade',
+    cost:5, tenCost:50, freeDaily:false,
+    pity:60, pityRarity:'极品',
+    pity2:120, pity2Rarity:'稀品', pity2Label:'金色稀品',
+    rarityRates:{'普通':0.694, '优品':0.25, '极品':0.05, '稀品':0.006},  // 金色稀品基础 0.6%
+    items:[
+      {id:'p_n1', name:'灵玉符',   type:'法器', rarity:'普通', bonusType:'cultivation',  bonus:0.2},
+      {id:'p_n2', name:'引气诀',   type:'古籍', rarity:'普通', bonusType:'breakthrough', bonus:0.1},
+      {id:'p_n3', name:'玉露饵',   type:'特殊', rarity:'普通', bonusType:'fishing',      bonus:0.1},
+      {id:'p_n4', name:'温玉火种', type:'特殊', rarity:'普通', bonusType:'alchemy',      bonus:0.1},
+      {id:'p_fs1', name:'灵金飞剑', type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.5},
+      {id:'p_gj1', name:'太乙心法', type:'古籍', rarity:'优品', bonusType:'breakthrough', bonus:0.3},
+      {id:'p_ts1', name:'神木鱼竿', type:'特殊', rarity:'优品', bonusType:'fishing',      bonus:0.3},
+      {id:'p_ts2', name:'太阳真火', type:'特殊', rarity:'优品', bonusType:'alchemy',      bonus:0.3},
+      // 新增 10 件优品
+      {id:'p_y01', name:'流光剑',   type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.5},
+      {id:'p_y02', name:'紫府心经', type:'古籍', rarity:'优品', bonusType:'breakthrough', bonus:0.3},
+      {id:'p_y03', name:'玄天鱼线', type:'特殊', rarity:'优品', bonusType:'fishing',      bonus:0.3},
+      {id:'p_y04', name:'玉髓丹火', type:'特殊', rarity:'优品', bonusType:'alchemy',      bonus:0.3},
+      {id:'p_y05', name:'星纹法袍', type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.5},
+      {id:'p_y06', name:'太虚剑诀', type:'古籍', rarity:'优品', bonusType:'breakthrough', bonus:0.3},
+      {id:'p_y07', name:'九龙鱼饵', type:'特殊', rarity:'优品', bonusType:'fishing',      bonus:0.3},
+      {id:'p_y08', name:'九幽寒焰', type:'特殊', rarity:'优品', bonusType:'alchemy',      bonus:0.3},
+      {id:'p_y09', name:'灵犀玉佩', type:'法器', rarity:'优品', bonusType:'cultivation',  bonus:0.5},
+      {id:'p_y10', name:'天音古卷', type:'古籍', rarity:'优品', bonusType:'breakthrough', bonus:0.3},
+      {id:'p_fs2', name:'太初神剑', type:'法器', rarity:'极品', bonusType:'cultivation',  bonus:0.5},
+      {id:'p_fs3', name:'混沌钟',   type:'法器', rarity:'极品', bonusType:'cultivation',  bonus:0.5},
+      {id:'p_gj2', name:'鸿蒙道经', type:'古籍', rarity:'极品', bonusType:'breakthrough', bonus:0.3},
+      {id:'p_ts3', name:'星辰鱼饵', type:'特殊', rarity:'极品', bonusType:'fishing',      bonus:0.3},
+      {id:'p_ts4', name:'混元灵液', type:'特殊', rarity:'极品', bonusType:'alchemy',      bonus:0.3},
+      // 新增 5 件极品
+      {id:'p_j01', name:'诛仙剑',   type:'法器', rarity:'极品', bonusType:'cultivation',  bonus:1.0},
+      {id:'p_j02', name:'无极道典', type:'古籍', rarity:'极品', bonusType:'breakthrough', bonus:0.5},
+      {id:'p_j03', name:'鲲鹏羽',   type:'特殊', rarity:'极品', bonusType:'fishing',      bonus:0.5},
+      {id:'p_j04', name:'南明离火', type:'特殊', rarity:'极品', bonusType:'alchemy',      bonus:0.5},
+      {id:'p_j05', name:'山河社稷图', type:'法器', rarity:'极品', bonusType:'cultivation', bonus:1.0},
+      // 新增 4 件金色稀品（先天灵宝）
+      {id:'p_x01', name:'先天灵宝·混沌珠',   type:'先天灵宝', rarity:'稀品', bonusType:'cultivation',  bonus:5.0},
+      {id:'p_x02', name:'先天灵宝·造化玉碟', type:'先天灵宝', rarity:'稀品', bonusType:'breakthrough', bonus:3.0},
+      {id:'p_x03', name:'先天灵宝·河图洛书', type:'先天灵宝', rarity:'稀品', bonusType:'fishing',      bonus:3.0},
+      {id:'p_x04', name:'先天灵宝·乾坤鼎',   type:'先天灵宝', rarity:'稀品', bonusType:'alchemy',      bonus:3.0}
+    ]
+  }
+];
+
+// 丹方：消耗、基础成功率、产出（洗髓丹/悟道茶绝不在这里产出）
+const RECIPES = [
+  {id:'jq', name:'聚气丹',      herb:'聚灵草', need:5, base:70, out:'聚气丹',     xp:10,  unlock:1, desc:'消耗 5 株聚灵草 · 每颗增加当前境界上限 10% 修为，每个小境界限服 5 颗'},
+  {id:'pj', name:'破境丹',      herb:'玄元花', need:5, base:50, out:'破境丹',     xp:20,  unlock:2, desc:'消耗 5 株玄元花 · 产出当前境界专用破境丹，仅可用于本境界突破'},
+  {id:'zh', name:'造化丹',      herb:'龙涎草', need:5, base:35, out:'造化丹',     xp:60,  unlock:3, desc:'消耗 5 株龙涎草 · 服用后 2 小时内修炼速度变为 3 倍（不直接加修为）'},
+  {id:'jz', name:'九转洗髓丹',  herb:'九转莲', need:5, base:25, out:'九转洗髓丹', xp:100, unlock:4, desc:'消耗 5 株九转莲 · 服用后重随灵根，并累计 20 次天灵根保底'}
+];
+
+// 丹药出售价 = 商城售价的 50%
+const PILL_SELL = {
+  聚气丹:400, 破境丹:2500, 悟道茶:1500, 洗髓丹:25000,
+  九转金丹:20000, 大罗仙丹:80000, 造化丹:30000, 九转洗髓丹:30000
+};
+
+const SAVE_KEY = 'xiuxian_idle_save_v1';
+
+// 机缘刷新：每 1 小时刷新 3 次
+const CHANCE_INTERVAL = 1 * 3600 * 1000;
+const CHANCE_MAX = 3;
+
+/* ================= 状态 ================= */
+let state = {
+  version: 4,
+  realm: 0,
+  layer: 1,
+  cultivation: 0,
+  stones: 0,
+  jade: 0,           // 灵玉（稀有货币，严格控制产出）
+  root: '双灵根',
+  xiSuiCount: 0,     // 洗髓保底进度（0~19，第20次必出天灵根）
+  fish: {},          // 鱼篓
+  herbs: {},         // 草药库存
+  seeds: {},         // 草药种子库存
+  dans: {},          // 丹药背包
+  pojingDan: 0,      // 旧版通用破境丹（读取旧档时迁移到 breakPills）
+  breakPills: {},    // 境界专属破境丹：{ [境界索引]: 数量 }
+  daluoxianDan: 0,   // 旧版大罗仙丹（保留，可手动服用）
+  hudaofu: 0,        // 护道符
+  wudaoRemain: 0,    // 悟道茶剩余秒数（1小时翻倍，可叠加）
+  zaohuaRemain: 0,   // 造化丹剩余秒数（2小时3倍）
+  daluoNextBonus: 0, // 手动服大罗仙丹后，下次突破额外成功率
+  juqiUsed: {},      // 聚气丹：{ [小境界索引]: 已服用数量 }，每境界限5颗
+  lastWudaoBuyDate: null, // 悟道茶每日限购日期
+  rods: {lucky:0, silver:0, gold:0, myth:0, jade:0, rarejade:0}, // 钓鱼竿（加法叠加，每种限购1根）
+  alchemyXP: 0,      // 炼丹经验
+  alchemyLevel: 1,   // 炼丹等级
+  fishing: false,
+  fishingProgress: 0,
+  garden: [null, null, null], // 药园 3 块地：null 或 {type, plantedAt}
+  alchemy: null,     // 炼丹：null 或 {recipeId, recipe, startedAt, duration}
+  gacha: {           // 抽卡
+    collection: [],  // 图鉴（已拥有物品 id）
+    bonuses: {cultivation:0, breakthrough:0, fishing:0, alchemy:0},
+    normal: {pity:0, pity2:0, lastFreeDate:null},  // pity=60抽优品保底, pity2=120抽极品保底
+    premium: {pity:0, pity2:0}                     // pity=60抽极品保底, pity2=120抽金色稀品保底
+  },
+  chanceCount: 3,    // 机缘剩余次数
+  lastChanceRefresh: Date.now(), // 上次机缘刷新时间戳
+  lastSignDate: null, // 上次签到日期（'YYYY-MM-DD'）
+  signStreak: 0,     // 连续签到天数
+  lastSave: Date.now(),
+  logs: []
+};
+FISH.forEach(f => state.fish[f.name] = 0);
+HERBS.forEach(h => state.herbs[h.name] = 0);
+HERBS.forEach(h => state.seeds[h.name] = 0);
+state.seeds['聚灵草'] = 5; // 新手友好：初始赠送 5 颗聚灵草种子
+['聚气丹','悟道茶','洗髓丹','九转金丹','大罗仙丹','造化丹','九转洗髓丹'].forEach(n => state.dans[n] = 0);
+
+let logDirty = true;
+let lastTick = Date.now();
+let lastSecond = 0;
+
+/* ================= 工具函数 ================= */
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmt(n){
+  n = Number(n);
+  if (!isFinite(n)) return '∞';
+  if (n < 0) return '-' + fmt(-n);
+  if (n < 10000) return Math.floor(n).toLocaleString('zh-CN');
+  const units = ['','万','亿','兆','京','垓','秭','穰','沟','涧','正','载','极','恒河沙','阿僧祇','那由他','不可思议','无量','大数'];
+  let u = 0, v = n;
+  while (v >= 10000 && u < units.length - 1){ v /= 10000; u++; }
+  let s = v.toFixed(2);
+  s = parseFloat(s).toString();
+  return s + units[u];
+}
+function fmtSpeed(v){
+  if (v < 1000) return (Math.round(v * 10) / 10).toString();
+  return fmt(v);
+}
+function fmtDur(sec){
+  sec = Math.max(0, Math.ceil(sec));
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  if (h > 0) return h + '小时' + (m ? m + '分' : '');
+  if (m > 0) return m + '分' + (s ? s + '秒' : '');
+  return s + '秒';
+}
+function rootInfo(){ return ROOT_TABLE.find(o => o.name === state.root) || ROOT_TABLE[0]; }
+function rootBonusText(name){
+  const r = ROOT_TABLE.find(o => o.name === name);
+  if (!r) return '';
+  const pct = Math.round(Math.abs(r.speed - 1) * 100);
+  let s = '修炼速度 ' + (r.speed > 1 ? '+' : r.speed < 1 ? '-' : '') + pct + '%';
+  if (r.bonus) s += '，突破成功率 +' + r.bonus + '%';
+  return s;
+}
+function rollRoot(){
+  const total = ROOT_TABLE.reduce((a, b) => a + b.w, 0);
+  let r = Math.random() * total;
+  for (const o of ROOT_TABLE){ r -= o.w; if (r <= 0) return o.name; }
+  return ROOT_TABLE[0].name;
+}
+function herbByName(name){ return HERBS.find(h => h.name === name); }
+function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+function stageToLabel(stage){
+  const s = Math.max(0, Math.min(161, stage));
+  const ri = Math.floor(s / 9);
+  const li = s % 9;
+  return REALMS[ri] + ' ' + LAYERS[li] + '层';
+}
+// 境界专属破境丹：炼气破境丹、筑基破境丹……（严格绑定境界）
+function realmBreakName(realmIdx){
+  const idx = Math.max(0, Math.min(REALMS.length - 1, realmIdx | 0));
+  return REALMS[idx].replace(/期$/, '') + '破境丹';
+}
+function realmIndexFromPillName(name){
+  if (!name || typeof name !== 'string') return -1;
+  if (name === '破境丹') return state.realm;
+  for (let i = 0; i < REALMS.length; i++){
+    if (realmBreakName(i) === name) return i;
+  }
+  return -1;
+}
+function isRealmBreakName(name){ return realmIndexFromPillName(name) >= 0; }
+function pillBaseName(name){
+  return realmIndexFromPillName(name) >= 0 ? '破境丹' : name;
+}
+function getBreakPillCount(realmIdx){
+  return Math.max(0, Math.floor((state.breakPills && state.breakPills[realmIdx]) || 0));
+}
+function setBreakPillCount(realmIdx, count){
+  if (!state.breakPills || typeof state.breakPills !== 'object') state.breakPills = {};
+  state.breakPills[realmIdx] = Math.max(0, Math.floor(count || 0));
+}
+function pillSellPrice(name){
+  return PILL_SELL[pillBaseName(name)] || 0;
+}
+function chanceCountdownMs(){
+  return Math.max(0, state.lastChanceRefresh + CHANCE_INTERVAL - Date.now());
+}
+function refreshChances(){
+  const now = Date.now();
+  if (now - state.lastChanceRefresh >= CHANCE_INTERVAL){
+    const wasFull = state.chanceCount >= CHANCE_MAX;
+    state.chanceCount = CHANCE_MAX;
+    state.lastChanceRefresh = now;
+    if (!wasFull) log('机缘刷新！获得 ' + CHANCE_MAX + ' 次机缘机会。');
+    return true;
+  }
+  return false;
+}
+function stageIndex(){ return state.realm * 9 + (state.layer - 1); }
+function getCap(){
+  // 突破所需修为 = 基础突破修为(100) * 1.5^(境界等级-1)，境界等级按总层数起算
+  const s = stageIndex();
+  return Math.round(100 * Math.pow(1.5, s));
+}
+function getBaseIncome(){ return 10 * Math.pow(1.10, stageIndex()); }
+function getIncome(){
+  let inc = getBaseIncome() * rootInfo().speed;
+  inc *= (1 + gachaBonus('cultivation') / 100); // 法器修炼速度加成（允许溢出100%，无上限）
+  if (state.wudaoRemain > 0) inc *= 2;
+  if (state.zaohuaRemain > 0) inc *= 3;          // 造化丹：2小时内修炼速度×3
+  if (state.cultivation > getCap()) inc *= 0.5;   // 修为溢出，速度减半
+  return inc;
+}
+function getTarget(){
+  if (state.layer < 9) return {realm: state.realm, layer: state.layer + 1};
+  if (state.realm < REALMS.length - 1) return {realm: state.realm + 1, layer: 1};
+  return null; // 已至巅峰
+}
+function isTribulation(target){
+  return target && (target.realm === 8 || target.realm === 9);
+}
+function getBaseBreakRate(){
+  const target = getTarget();
+  if (!target) return {rate:100, isTrib:false, target:null};
+  const trib = isTribulation(target);
+  let base = (trib ? 50 : 75) - stageIndex() * 0.5; // 境界越高，成功率越低
+  base = Math.max(10, base);                         // 基础成功率最低 10%
+  let rate = base;
+  if (rootInfo().bonus) rate += rootInfo().bonus;
+  rate += Math.min(100, gachaBonus('breakthrough')); // 古籍突破率加成（封顶100%）
+  return {rate: Math.min(rate, 99), isTrib: trib, target: target}; // 丹药可把 99% 推到 100%
+}
+function getRateInfo(){ return getBaseBreakRate(); }
+function calcBreakRate(pillCount){
+  const info = getBaseBreakRate();
+  const bonusOnce = Math.max(0, state.daluoNextBonus || 0);
+  const rate = info.rate + Math.max(0, Math.floor(pillCount || 0)) * 15 + bonusOnce;
+  return Math.min(100, rate);
+}
+
+/* ================= 日志 ================= */
+function log(msg){
+  state.logs.push({t: Date.now(), m: msg});
+  if (state.logs.length > 300) state.logs.splice(0, state.logs.length - 300);
+  logDirty = true;
+}
+// 视觉反馈：成功绿色 / 失败红色 / 信息金色
+function showToast(msg, type){
+  const wrap = document.getElementById('toastWrap');
+  if (!wrap) return;
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type === 'success' ? 'success' : type === 'fail' ? 'fail' : 'info');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  const remove = () => {
+    if (!el.parentNode) return;
+    el.classList.add('out');
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 260);
+  };
+  el.addEventListener('click', remove);
+  setTimeout(remove, type === 'fail' ? 4200 : 3200);
+}
+function renderLog(){
+  const el = document.getElementById('log');
+  const start = Math.max(0, state.logs.length - 60);
+  el.innerHTML = state.logs.slice(start).map(e => {
+    const d = new Date(e.t);
+    const hh = String(d.getHours()).padStart(2,'0');
+    const mm = String(d.getMinutes()).padStart(2,'0');
+    const ss = String(d.getSeconds()).padStart(2,'0');
+    return '<div class="log-line">[' + hh + ':' + mm + ':' + ss + '] ' + esc(e.m) + '</div>';
+  }).join('');
+  const panel = document.getElementById('log-panel');
+  panel.scrollTop = panel.scrollHeight;
+}
+
+/* ================= 音效 ================= */
+let audioCtx = null;
+function ensureAudio(){
+  if (!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    audioCtx = new AC();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(freq, dur, type, vol, when){
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  type = type || 'sine'; vol = vol || 0.15; when = when || 0;
+  const t = ctx.currentTime + when;
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(ctx.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function playSuccess(){ tone(660, .12, 'sine', .15, 0); tone(880, .2, 'sine', .15, .09); }
+function playFail(){ tone(320, .2, 'triangle', .18, 0); tone(210, .26, 'triangle', .18, .12); }
+function playThunder(){
+  const ctx = ensureAudio();
+  if (!ctx) return;
+  const t = ctx.currentTime;
+  const dur = 1.4;
+  const n = Math.floor(ctx.sampleRate * dur);
+  const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++){
+    const p = i / n;
+    d[i] = (Math.random() * 2 - 1) * Math.pow(1 - p, 2.2);
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(900, t);
+  lp.frequency.exponentialRampToValueAtTime(90, t + dur);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.9, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(lp); lp.connect(g); g.connect(ctx.destination);
+  src.start(t);
+  const o = ctx.createOscillator();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(60, t);
+  o.frequency.exponentialRampToValueAtTime(30, t + dur);
+  const og = ctx.createGain();
+  og.gain.setValueAtTime(0.0001, t);
+  og.gain.exponentialRampToValueAtTime(0.5, t + 0.03);
+  og.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(og).connect(ctx.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+
+/* ================= 渡劫特效 ================= */
+let tribTimer = null;
+function showTribOverlay(){
+  const ov = document.getElementById('tribOverlay');
+  ov.classList.remove('show');
+  void ov.offsetWidth;
+  ov.classList.add('show');
+  clearTimeout(tribTimer);
+  tribTimer = setTimeout(() => ov.classList.remove('show'), 2350);
+}
+
+/* ================= 突破 ================= */
+let breakModalState = null;
+
+function openBreakthroughModal(){
+  const cap = getCap();
+  const info = getBaseBreakRate();
+  if (!info.target){
+    log('你已至道祖圆满，大道已成。');
+    showToast('已至道祖圆满，无需突破', 'info');
+    return;
+  }
+  if (state.cultivation < cap){
+    log('修为不足，尚无法突破。');
+    showToast('修为不足，尚无法突破', 'fail');
+    return;
+  }
+  const pills = getBreakPillCount(state.realm);
+  const otherPills = [];
+  REALMS.forEach((r, i) => {
+    if (i === state.realm) return;
+    const c = getBreakPillCount(i);
+    if (c > 0) otherPills.push(realmBreakName(i) + '×' + c);
+  });
+  let body = '<div class="break-rate-box">' +
+    '目标：<b>' + REALMS[info.target.realm] + ' ' + LAYERS[info.target.layer - 1] + '层</b><br>' +
+    '基础成功率：<b>' + info.rate + '%</b>' + (state.daluoNextBonus > 0 ? ' · 大罗仙丹药力 +30%' : '') + '<br>' +
+    '本境界破境丹：<b>' + pills + '</b> 枚（每枚 +15%）<br>' +
+    '当前成功率：<b id="breakRateDisplay">' + calcBreakRate(0) + '%</b><br>' +
+    '<span id="breakRateHint" class="hint" style="text-align:left;display:block;"></span>' +
+    '</div>';
+  if (pills > 0){
+    body += '<div class="break-pill-list">';
+    for (let i = 0; i < pills; i++){
+      body += '<label class="break-pill-item"><input type="checkbox" class="break-pill-check" onchange="updateBreakModalRate()">' +
+        '<span>' + realmBreakName(state.realm) + ' ×1</span><span class="pill-plus">+15%</span></label>';
+    }
+    body += '</div>';
+  } else {
+    body += '<div class="break-empty">背包中没有可用于本境界的破境丹，可直接尝试突破。</div>';
+  }
+  if (otherPills.length){
+    body += '<div class="break-other">其他境界破境丹（境界不符，不可使用）：' + otherPills.join('、') + '</div>';
+  }
+  body += '<p class="hint" style="text-align:left;">勾选数量不限；成功率达到 100% 后，剩余未勾选丹药会自动置灰。突破失败仍会消耗已勾选的丹药。</p>';
+  openModal('突破 · ' + (info.isTrib ? '渡劫' : '破境'), body,
+    '<button class="btn" onclick="closeModal()">取消</button>' +
+    '<button class="btn primary" onclick="confirmBreakModal()">开始突破</button>');
+  updateBreakModalRate();
+}
+function updateBreakModalRate(){
+  const checks = Array.from(document.querySelectorAll('.break-pill-check'));
+  const selected = checks.filter(c => c.checked).length;
+  const rate = calcBreakRate(selected);
+  const disp = document.getElementById('breakRateDisplay');
+  const hint = document.getElementById('breakRateHint');
+  if (disp){
+    disp.textContent = (rate >= 100 ? 100 : rate) + '%';
+    disp.className = rate >= 100 ? 'maxed' : '';
+  }
+  if (hint){
+    if (rate >= 100) hint.textContent = '已达 100% 上限 · 剩余未勾选丹药已自动置灰';
+    else hint.textContent = '还可勾选 ' + Math.max(0, Math.ceil((100 - rate) / 15)) + ' 枚达到 100% 上限';
+  }
+  checks.forEach(c => {
+    const lab = c.closest('.break-pill-item');
+    if (!c.checked){
+      c.disabled = rate >= 100;
+      if (lab) lab.classList.toggle('disabled', rate >= 100);
+    } else {
+      c.disabled = false;
+      if (lab) lab.classList.remove('disabled');
+    }
+  });
+}
+function confirmBreakModal(){
+  const checks = Array.from(document.querySelectorAll('.break-pill-check'));
+  const selected = checks.filter(c => c.checked).length;
+  closeModal();
+  attemptBreakthrough(selected);
+}
+function attemptBreakthrough(selectedPills){
+  const cap = getCap();
+  const info = getBaseBreakRate();
+  if (!info.target){ log('你已至道祖圆满，大道已成。'); return; }
+  if (state.cultivation < cap){ log('修为不足，尚无法突破。'); render(); return; }
+  const avail = getBreakPillCount(state.realm);
+  const usePills = Math.max(0, Math.min(avail, Math.floor(selectedPills || 0)));
+  const rate = calcBreakRate(usePills);
+  const daluoUsed = (state.daluoNextBonus || 0) > 0;
+  if (usePills > 0) setBreakPillCount(state.realm, avail - usePills);
+  if (daluoUsed) state.daluoNextBonus = 0;
+
+  if (info.isTrib){
+    showTribOverlay();
+    playThunder();
+    setTimeout(playThunder, 500);
+  }
+
+  const roll = Math.random() * 100;
+  const usedText = [usePills > 0 ? realmBreakName(state.realm) + '×' + usePills : '', daluoUsed ? '大罗仙丹药力' : ''].filter(Boolean).join('、');
+  if (roll < rate){
+    state.cultivation -= cap;
+    state.realm = info.target.realm;
+    state.layer = info.target.layer;
+    const label = REALMS[state.realm] + ' ' + LAYERS[state.layer - 1] + '层';
+    log('突破成功！晋升至【' + label + '】（成功率 ' + rate + '%' + (usedText ? '，消耗 ' + usedText : '') + '）');
+    showToast('突破成功！晋升至【' + label + '】', 'success');
+    playSuccess();
+  } else {
+    const lost = state.cultivation * 0.2;
+    state.cultivation *= 0.8;
+    if (info.isTrib){
+      if (state.hudaofu > 0){
+        state.hudaofu--;
+        log('渡劫失败！护道符护身，免除掉落，但修为损失 20%（' + fmt(lost) + '）' + (usedText ? '（已消耗 ' + usedText + '）' : ''));
+        showToast('渡劫失败！护道符护身，修为损失 20%', 'fail');
+      } else {
+        if (state.layer > 1) state.layer--;
+        else if (state.realm > 0){ state.realm--; state.layer = 9; }
+        log('渡劫失败！修为损失 20%（' + fmt(lost) + '），并掉落一个小境界至【' + REALMS[state.realm] + ' ' + LAYERS[state.layer - 1] + '层】' + (usedText ? '（已消耗 ' + usedText + '）' : ''));
+        showToast('渡劫失败！掉落一个小境界', 'fail');
+      }
+    } else {
+      log('突破失败，修为损失 20%（' + fmt(lost) + '）' + (usedText ? '（已消耗 ' + usedText + '）' : ''));
+      showToast('突破失败，修为损失 20%', 'fail');
+    }
+    playFail();
+  }
+  render();
+  save();
+}
+
+/* ================= 钓鱼 ================= */
+function fishingGachaBonus(){
+  // gacha 特殊物品「钓鱼概率」加成：严格封顶 50%，超过无效，防崩坏
+  return Math.min(50, gachaBonus('fishing'));
+}
+function fishLuckMult(){
+  // 稀有鱼倍率 = 1 + 各鱼竿加成之和（加法叠加，绝不乘法） + gacha钓鱼加成(封顶50%，转比率)
+  let m = 1;
+  RODS.forEach(r => { m += (r.bonus || 0) * ((state.rods && state.rods[r.id]) || 0); });
+  m += fishingGachaBonus() / 100;
+  return m;
+}
+function jadeFishBonusW(){
+  // 灵玉鱼竿类：灵玉鱼概率额外加成（直接加到权重上，每种限购1根，加法叠加）
+  let b = 0;
+  RODS.forEach(r => {
+    if (r.jadeBonus) b += r.jadeBonus * ((state.rods && state.rods[r.id]) || 0);
+  });
+  return b;
+}
+function rollFish(){
+  const mult = fishLuckMult();
+  // 最终出鱼权重 = 原始基础权重 × (1 + 总加成百分比)；加成为加法叠加
+  const weights = FISH.map(f => ({
+    name: f.name,
+    w: f.rare ? f.w * mult : f.w
+  }));
+  // 灵玉鱼竿专属：灵玉鱼权重额外 +0.5（基础权重 0.5，即概率约 0.5% → 约 1%）
+  if (jadeFishBonusW() > 0){
+    const jw = weights.find(w => w.name === '灵玉鱼');
+    if (jw) jw.w += jadeFishBonusW();
+  }
+  const total = weights.reduce((a, b) => a + b.w, 0);
+  let r = Math.random() * total;
+  for (const w of weights){ r -= w.w; if (r <= 0) return w.name; }
+  return weights[weights.length - 1].name;
+}
+function addFish(name){
+  state.fish[name] = (state.fish[name] || 0) + 1;
+}
+function catchFish(){
+  const name = rollFish();
+  addFish(name);
+  const f = FISH.find(x => x.name === name);
+  log('钓到【' + name + '】（' + fmt(f.price) + (f.currency === 'jade' ? ' 灵玉' : ' 灵石') + '）');
+  renderFish();
+}
+/* ================= 自定义出售数量 ================= */
+let sellState = null; // {kind:'fish'|'herb', name, qty, count, price}
+function openSellModal(kind, name){
+  let count, price, currency = 'stone';
+  if (kind === 'fish'){
+    const f = FISH.find(x => x.name === name);
+    if (!f) return;
+    count = state.fish[name] || 0;
+    price = f.price;
+    if (f.currency === 'jade') currency = 'jade';
+  } else if (kind === 'herb'){
+    const h = herbByName(name);
+    if (!h) return;
+    count = state.herbs[name] || 0;
+    price = h.sell;
+  } else if (kind === 'pill'){
+    count = getPillCount(name);
+    price = pillSellPrice(name);
+    if (!price || count <= 0) return;
+  } else {
+    return;
+  }
+  if (count <= 0) return;
+  const unit = currency === 'jade' ? '灵玉' : '灵石';
+  sellState = {kind, name, qty: 1, count, price, currency};
+  openModal('出售 ' + name,
+    '<div class="sell-box">' +
+      '<div class="sell-line">库存 ' + count + ' · 单价 ' + fmt(price) + ' ' + unit + '</div>' +
+      '<div class="sell-qty">' +
+        '<button class="btn small" onclick="adjSell(-1)">−</button>' +
+        '<input id="sellInput" type="number" min="1" max="' + count + '" value="1" oninput="onSellInput(this.value)">' +
+        '<button class="btn small" onclick="adjSell(1)">＋</button>' +
+        '<button class="btn small" onclick="adjSellMax()">最大</button>' +
+      '</div>' +
+      '<div class="sell-total">预计获得 <b id="sellTotal">' + fmt(price) + '</b> ' + unit + '</div>' +
+    '</div>',
+    '<button class="btn" onclick="closeModal()">取消</button>' +
+    '<button class="btn primary" onclick="confirmSell()">确认出售</button>');
+}
+function adjSell(d){
+  if (!sellState) return;
+  let q = sellState.qty + d;
+  if (q < 1) q = 1;
+  if (q > sellState.count) q = sellState.count;
+  sellState.qty = q;
+  document.getElementById('sellInput').value = q;
+  document.getElementById('sellTotal').textContent = fmt(q * sellState.price);
+}
+function adjSellMax(){
+  if (!sellState) return;
+  sellState.qty = sellState.count;
+  document.getElementById('sellInput').value = sellState.qty;
+  document.getElementById('sellTotal').textContent = fmt(sellState.qty * sellState.price);
+}
+function onSellInput(v){
+  if (!sellState) return;
+  let q = parseInt(v, 10);
+  if (isNaN(q) || q < 1) q = 1;
+  if (q > sellState.count) q = sellState.count;
+  sellState.qty = q;
+  document.getElementById('sellTotal').textContent = fmt(q * sellState.price);
+}
+function confirmSell(){
+  if (!sellState) return;
+  const s = sellState;
+  if (s.kind === 'fish') state.fish[s.name] = (state.fish[s.name] || 0) - s.qty;
+  else if (s.kind === 'herb') state.herbs[s.name] = (state.herbs[s.name] || 0) - s.qty;
+  else if (s.kind === 'pill') setPillCount(s.name, getPillCount(s.name) - s.qty);
+  const total = s.qty * s.price;
+  const unit = s.currency === 'jade' ? '灵玉' : '灵石';
+  if (s.currency === 'jade') state.jade = (state.jade || 0) + total;
+  else state.stones += total;
+  log('出售 ' + s.name + ' ×' + s.qty + '，获得 ' + fmt(total) + ' ' + unit);
+  sellState = null;
+  closeModal();
+  render(); save();
+}
+function sellAllRegularFish(){
+  let total = 0, count = 0;
+  FISH.forEach(f => {
+    // 一键出售绝不碰灵玉鱼 / 龙鳞鱼（任何灵玉货币鱼都保留）
+    if (f.currency === 'jade' || f.name === '灵玉鱼' || f.name === '龙鳞鱼') return;
+    const cnt = state.fish[f.name] || 0;
+    if (cnt > 0){
+      total += f.price * cnt;
+      count += cnt;
+      state.fish[f.name] = 0;
+    }
+  });
+  if (!count){
+    log('没有可出售的常规鱼（灵玉鱼与龙鳞鱼不会被一键出售）。');
+    showToast('鱼篓中没有常规鱼，灵玉鱼与龙鳞鱼已保留', 'info');
+    renderFish();
+    return;
+  }
+  state.stones += total;
+  log('一键出售常规鱼 ' + count + ' 条，获得 ' + fmt(total) + ' 灵石（灵玉鱼/龙鳞鱼已保留）');
+  showToast('出售常规鱼 ' + count + ' 条，灵石 +' + fmt(total), 'success');
+  render(); save();
+}
+function sellAll(){ sellAllRegularFish(); }
+
+/* ================= 药园 ================= */
+function plotRemaining(plot){
+  if (!plot) return 0;
+  const h = herbByName(plot.type);
+  if (!h) return 0;
+  return Math.max(0, (plot.plantedAt + h.grow * 1000) - Date.now()) / 1000;
+}
+function plotReady(plot){
+  if (!plot) return false;
+  const h = herbByName(plot.type);
+  return !!(h && Date.now() - plot.plantedAt >= h.grow * 1000);
+}
+function plantHerb(i, name){
+  if (state.garden[i]){ log('这块地已有作物。'); return; }
+  const seeds = (state.seeds && state.seeds[name]) || 0;
+  if (seeds <= 0){
+    log('没有【' + name + '】种子，请先到商店购买。');
+    showToast('没有【' + name + '】种子，请先到商店购买', 'fail');
+    return;
+  }
+  state.seeds[name] = seeds - 1;
+  state.garden[i] = {type: name, plantedAt: Date.now()};
+  log('在第 ' + (i + 1) + ' 块地种下【' + name + '】，消耗 1 颗种子（剩余 ' + state.seeds[name] + ' 颗）。');
+  render(); save();
+}
+function harvestPlot(i){
+  const p = state.garden[i];
+  if (!p) return;
+  if (!plotReady(p)){ log('尚未成熟，请耐心等待。'); renderGarden(); return; }
+  const name = p.type;
+  state.herbs[name] = (state.herbs[name] || 0) + 1;
+  state.garden[i] = null;
+  let extraMsg = '';
+  // 高级草药（龙涎草/九转莲）：收获时有 5% 概率额外产出 1 灵玉
+  const h = herbByName(name);
+  if (h && h.advanced && Math.random() * 100 < 5){
+    state.jade = (state.jade || 0) + 1;
+    extraMsg = '，天降灵气凝结出 1 灵玉！';
+  }
+  log('收获【' + name + '】×1' + extraMsg);
+  render(); save();
+}
+function uprootPlot(i){
+  const p = state.garden[i];
+  if (!p) return;
+  if (plotReady(p)){
+    log('作物已经成熟，请先收获。');
+    return;
+  }
+  if (!confirm('确定拔除第 ' + (i + 1) + ' 块地的【' + p.type + '】吗？\n拔除后不返还任何材料，土地恢复为空地。')) return;
+  state.garden[i] = null;
+  log('拔除了第 ' + (i + 1) + ' 块地的【' + p.type + '】，未返还材料。');
+  showToast('已拔除【' + p.type + '】，土地恢复为空地', 'info');
+  render(); save();
+}
+function sellAllHerbs(){
+  let total = 0, any = false;
+  HERBS.forEach(h => {
+    const cnt = state.herbs[h.name] || 0;
+    if (cnt > 0){ total += h.sell * cnt; state.herbs[h.name] = 0; any = true; }
+  });
+  if (!any){ log('没有可出售的草药。'); render(); return; }
+  state.stones += total;
+  log('出售全部草药，获得 ' + fmt(total) + ' 灵石');
+  render(); save();
+}
+
+/* ================= 丹房 ================= */
+function grantPill(name){
+  if (!name) return name;
+  // 境界专属破境丹：严格绑定当前/指定境界
+  const realmIdx = realmIndexFromPillName(name);
+  if (realmIdx >= 0){
+    setBreakPillCount(realmIdx, getBreakPillCount(realmIdx) + 1);
+    return realmBreakName(realmIdx);
+  }
+  if (name === '大罗仙丹') state.daluoxianDan = (state.daluoxianDan || 0) + 1;
+  else if (name === '护道符') state.hudaofu = (state.hudaofu || 0) + 1;
+  else state.dans[name] = (state.dans[name] || 0) + 1;
+  return name;
+}
+function getPillCount(name){
+  const realmIdx = realmIndexFromPillName(name);
+  if (realmIdx >= 0) return getBreakPillCount(realmIdx);
+  if (name === '大罗仙丹') return state.daluoxianDan || 0;
+  return state.dans[name] || 0;
+}
+function setPillCount(name, c){
+  const realmIdx = realmIndexFromPillName(name);
+  if (realmIdx >= 0){ setBreakPillCount(realmIdx, c); return; }
+  if (name === '大罗仙丹'){ state.daluoxianDan = Math.max(0, Math.floor(c || 0)); return; }
+  state.dans[name] = Math.max(0, Math.floor(c || 0));
+}
+// 洗髓：每次服用累计 1 次，第 20 次必出天灵根；自然洗出天灵根则清零
+function washRoot(sourceName){
+  const old = state.root;
+  state.xiSuiCount = Math.max(0, Math.floor(state.xiSuiCount || 0)) + 1;
+  let nr, pityText;
+  if (state.xiSuiCount >= 20){
+    nr = '天灵根';
+    state.root = nr;
+    state.xiSuiCount = 0;
+    pityText = '（20 次保底触发，进度已重置）';
+  } else {
+    nr = rollRoot();
+    state.root = nr;
+    if (nr === '天灵根'){
+      state.xiSuiCount = 0;
+      pityText = '（洗出天灵根，保底进度已重置）';
+    } else {
+      pityText = '（保底进度 ' + state.xiSuiCount + '/20）';
+    }
+  }
+  const msg = '服用' + sourceName + '：灵根由【' + old + '】重塑为【' + nr + '】！' + pityText;
+  log(msg);
+  showToast(msg, 'success');
+}
+function usePill(name){
+  const realmIdx = realmIndexFromPillName(name);
+  if (realmIdx >= 0){
+    log('【' + name + '】只能在突破弹窗中勾选使用，且仅限【' + REALMS[realmIdx] + '】突破。');
+    showToast('破境丹需在突破弹窗中勾选使用', 'info');
+    return;
+  }
+  const n = getPillCount(name);
+  if (n <= 0){ log('没有【' + name + '】可服用。'); return; }
+  if (name === '聚气丹'){
+    const stage = stageIndex();
+    const used = Math.max(0, Math.floor(state.juqiUsed[stage] || 0));
+    if (used >= 5){
+      log('本小境界已服用 5 颗聚气丹，再服用无效。');
+      showToast('本小境界聚气丹已达上限（5/5），再服用无效', 'fail');
+      return;
+    }
+    state.dans[name] = n - 1;
+    const gain = getCap() * 0.10;
+    state.cultivation += gain;
+    state.juqiUsed[stage] = used + 1;
+    log('服用聚气丹，修为 +' + fmt(gain) + '（本境界 ' + state.juqiUsed[stage] + '/5）');
+    showToast('聚气丹：修为 +' + fmt(gain) + '（本境界 ' + state.juqiUsed[stage] + '/5）', 'success');
+  } else if (name === '九转金丹'){
+    state.dans[name] = n - 1;
+    const gain = getCap() * 0.5;
+    state.cultivation += gain;
+    log('服用九转金丹，仙力灌体，修为 +' + fmt(gain) + '！');
+    showToast('九转金丹：修为 +' + fmt(gain), 'success');
+    playSuccess();
+  } else if (name === '悟道茶'){
+    state.dans[name] = n - 1;
+    state.wudaoRemain = (state.wudaoRemain || 0) + 3600;
+    log('饮下悟道茶，接下来 1 小时修炼速度翻倍（可叠加时间）。');
+    showToast('悟道茶生效：1 小时内修炼速度×2（可叠加）', 'success');
+  } else if (name === '造化丹'){
+    state.dans[name] = n - 1;
+    state.zaohuaRemain = (state.zaohuaRemain || 0) + 7200;
+    log('服用造化丹，接下来 2 小时修炼速度变为 3 倍（可叠加时间）。');
+    showToast('造化丹生效：2 小时内修炼速度×3（可叠加）', 'success');
+  } else if (name === '洗髓丹' || name === '九转洗髓丹'){
+    state.dans[name] = n - 1;
+    washRoot(name);
+  } else if (name === '大罗仙丹'){
+    if ((state.daluoNextBonus || 0) > 0){
+      log('大罗仙丹药力仍在经脉中，无需重复服用。');
+      showToast('大罗仙丹药力已激活，无需重复服用', 'info');
+      return;
+    }
+    state.daluoxianDan = n - 1;
+    state.daluoNextBonus = 30;
+    log('服下大罗仙丹，药力蓄于经脉：下次突破成功率 +30%（可与破境丹叠加）。');
+    showToast('大罗仙丹药力已激活：下次突破 +30%', 'success');
+  } else {
+    log('【' + name + '】暂时无法直接服用。');
+    return;
+  }
+  render(); save();
+}
+function alchemyTime(){
+  return Math.max(5, 10 - (state.alchemyLevel - 1) * 5); // 每升1级-5秒，最低5秒
+}
+function alchemyRecipeFor(a){
+  if (!a) return null;
+  return RECIPES.find(r => r.id === a.recipeId) || RECIPES.find(r => r.name === a.recipe) || null;
+}
+function alchemyRemaining(){
+  if (!state.alchemy) return 0;
+  const dur = state.alchemy.duration || alchemyTime();
+  return Math.max(0, dur - (Date.now() - state.alchemy.startedAt) / 1000);
+}
+function startAlchemy(id){
+  const rec = RECIPES.find(r => r.id === id);
+  if (!rec) return;
+  if ((state.alchemyLevel || 1) < rec.unlock){ log('炼丹等级不足，需要 ' + rec.unlock + ' 级才能炼制【' + rec.name + '】。'); return; }
+  if (state.alchemy){ log('丹炉正在使用中，请稍候。'); return; }
+  if ((state.herbs[rec.herb] || 0) < rec.need){ log('草药不足，炼制【' + rec.name + '】需要 ' + rec.need + ' 株【' + rec.herb + '】。'); return; }
+  state.herbs[rec.herb] -= rec.need;
+  state.alchemy = {recipeId: rec.id, recipe: rec.name, startedAt: Date.now(), duration: alchemyTime()};
+  log('开炉炼制【' + rec.name + '】，投入 ' + rec.need + ' 株【' + rec.herb + '】……');
+  render(); save();
+}
+function completeAlchemy(){
+  const a = state.alchemy;
+  if (!a) return;
+  state.alchemy = null;
+  const rec = alchemyRecipeFor(a);
+  if (!rec){
+    log('丹炉中的旧丹方已失效，本次炼丹已取消。');
+    showToast('旧丹方已失效，本次炼丹取消', 'info');
+    render(); save();
+    return;
+  }
+  const rate = Math.min(99, rec.base + state.realm * 5 + gachaBonus('alchemy'));
+  if (Math.random() * 100 < rate){
+    const gotName = grantPill(rec.out);
+    state.alchemyXP = (state.alchemyXP || 0) + rec.xp;
+    let lvUp = '';
+    while (state.alchemyXP >= state.alchemyLevel * 100){
+      state.alchemyXP -= state.alchemyLevel * 100;
+      state.alchemyLevel++;
+      lvUp = '，炼丹等级提升至 ' + state.alchemyLevel + ' 级！';
+    }
+    const msg = '炼制成功！获得【' + gotName + '】x1';
+    log(msg + '（成功率 ' + rate + '%' + (lvUp ? lvUp : '') + '）');
+    showToast(msg, 'success');
+    playSuccess();
+  } else {
+    const msg = '轰！炸炉了，草药化为灰烬...';
+    log(msg + '（炼制【' + rec.name + '】失败，成功率 ' + rate + '%）');
+    showToast(msg, 'fail');
+    playFail();
+  }
+  render(); save();
+}
+function tickAlchemy(){
+  if (state.alchemy){
+    const dur = (state.alchemy.duration || alchemyTime()) * 1000;
+    if (Date.now() - state.alchemy.startedAt >= dur){
+      completeAlchemy();
+    }
+  }
+}
+function updateAlchemyUI(){
+  const status = document.getElementById('alchemyStatus');
+  const levelBox = document.getElementById('alchemyLevelBox');
+  const bar = document.getElementById('alchemyRunBar');
+  const fill = document.getElementById('alchemyRunFill');
+  const lv = Math.max(1, state.alchemyLevel || 1);
+  const xp = Math.max(0, state.alchemyXP || 0);
+  const need = lv * 100;
+  if (levelBox){
+    levelBox.innerHTML = '<div class="alchemy-level-head"><span>炼丹等级 <b>Lv.' + lv + '</b></span>' +
+      '<span>经验 ' + xp + ' / ' + need + '</span></div>' +
+      '<div class="alchemy-xp-bar"><div style="width:' + Math.min(100, xp / need * 100).toFixed(1) + '%"></div></div>';
+  }
+  if (status){
+    if (state.alchemy){
+      status.textContent = '正在炼制【' + state.alchemy.recipe + '】…… 剩余 ' + alchemyRemaining().toFixed(1) + ' 秒';
+    } else {
+      status.textContent = '丹炉空闲 · 基础耗时 ' + alchemyTime() + ' 秒 · 炼丹概率加成 +' + gachaBonus('alchemy') + '%';
+    }
+  }
+  if (bar && fill){
+    if (state.alchemy){
+      const dur = state.alchemy.duration || alchemyTime();
+      const pct = Math.max(0, Math.min(100, (1 - alchemyRemaining() / dur) * 100));
+      bar.style.display = 'block';
+      fill.style.width = pct.toFixed(1) + '%';
+    } else {
+      bar.style.display = 'none';
+      fill.style.width = '0%';
+    }
+  }
+}
+
+/* ================= 商店 ================= */
+function buyJuqi(){
+  if (state.stones < 800){ log('灵石不足，无法购买聚气丹。'); return; }
+  state.stones -= 800;
+  grantPill('聚气丹');
+  log('购入聚气丹 ×1（已放入丹药背包）。');
+  render(); save();
+}
+function buyPojing(){
+  if (state.stones < 5000){ log('灵石不足，无法购买破境丹。'); showToast('灵石不足', 'fail'); return; }
+  state.stones -= 5000;
+  const got = grantPill('破境丹');
+  log('购入【' + got + '】×1（仅可用于' + REALMS[state.realm] + '突破）。');
+  showToast('购入【' + got + '】×1', 'success');
+  render(); save();
+}
+function buyWudao(){
+  if (state.lastWudaoBuyDate === todayStr()){
+    log('今日悟道茶已购买（每日限购 1 个）。');
+    showToast('悟道茶每日限购 1 个，明日再来', 'info');
+    return;
+  }
+  if (state.stones < 3000){ log('灵石不足，无法购买悟道茶。'); showToast('灵石不足', 'fail'); return; }
+  state.stones -= 3000;
+  state.lastWudaoBuyDate = todayStr();
+  state.wudaoRemain = (state.wudaoRemain || 0) + 3600; // 立刻生效，不存背包；可叠加时间
+  log('购入并饮下悟道茶，接下来 1 小时修炼速度翻倍（时间可叠加）。');
+  showToast('悟道茶立刻生效：1 小时内修炼速度×2（可叠加）', 'success');
+  render(); save();
+}
+function buyXisui(){
+  if (state.stones < 50000){ log('灵石不足，无法购买洗髓丹。'); showToast('灵石不足', 'fail'); return; }
+  state.stones -= 50000;
+  grantPill('洗髓丹');
+  log('购入洗髓丹 ×1（已放入丹药背包，20 次保底天灵根）。');
+  showToast('购入洗髓丹 ×1', 'success');
+  render(); save();
+}
+function buyHudao(){
+  if (state.stones < 8000){ log('灵石不足，无法购买护道符。'); return; }
+  state.stones -= 8000;
+  state.hudaofu++;
+  log('购入护道符 ×1（渡劫失败时免除掉落小境界）。');
+  render(); save();
+}
+function totalRods(){
+  let n = 0;
+  RODS.forEach(r => { n += (state.rods && state.rods[r.id]) || 0; });
+  return n;
+}
+function rodBonusSum(){
+  let s = 0;
+  RODS.forEach(r => { s += (r.bonus || 0) * ((state.rods && state.rods[r.id]) || 0); });
+  return s;
+}
+function buyRod(id){
+  const rod = RODS.find(r => r.id === id);
+  if (!rod) return;
+  // 每种鱼竿独立限购 1 根（不再共享总数上限）
+  if ((state.rods[rod.id] || 0) >= 1){ log('已拥有【' + rod.name + '】，每种鱼竿限购 1 根。'); return; }
+  if (state.stones < rod.price){ log('灵石不足，无法购买【' + rod.name + '】。'); return; }
+  state.stones -= rod.price;
+  state.rods[rod.id] = (state.rods[rod.id] || 0) + 1;
+  const effect = rod.jadeBonus
+    ? '灵玉鱼概率额外 +' + rod.jadeBonus.toFixed(1) + '%'
+    : '稀有鱼概率加成 +' + rod.bonus + '%';
+  log('购入【' + rod.name + '】！' + effect + '（当前灵玉鱼额外加成 +' + jadeFishBonusW().toFixed(1) + '%，稀有鱼倍率 ×' + fishLuckMult().toFixed(2) + '）');
+  render(); save();
+}
+function buyItem(name){
+  const map = {
+    '聚气丹': buyJuqi, '破境丹': buyPojing, '悟道茶': buyWudao,
+    '洗髓丹': buyXisui, '护道符': buyHudao
+  };
+  if (map[name]) map[name]();
+}
+function seedPrice(name){
+  const h = herbByName(name);
+  return h ? (h.seedPrice || Math.max(1, Math.round(h.sell / 5))) : 0;
+}
+function buySeed(name){
+  const h = herbByName(name);
+  if (!h) return;
+  const price = seedPrice(name);
+  if (state.stones < price){ log('灵石不足，无法购买【' + name + '种子】。'); showToast('灵石不足', 'fail'); return; }
+  state.stones -= price;
+  if (!state.seeds || typeof state.seeds !== 'object') state.seeds = {};
+  state.seeds[name] = (state.seeds[name] || 0) + 1;
+  log('购入【' + name + '种子】×1（' + fmt(price) + ' 灵石），当前 ' + state.seeds[name] + ' 颗。');
+  showToast('购入【' + name + '种子】×1', 'success');
+  render(); save();
+}
+
+/* ================= 机缘（随机事件） ================= */
+let currentBattle = null; // {off, enemyStage, winRate}
+function showResultModal(title, msg){
+  openModal(title,
+    '<div class="result-box">' + msg + '</div>',
+    '<button class="btn primary" onclick="closeModal()">知道了</button>');
+}
+function triggerChance(){
+  refreshChances();
+  if (state.chanceCount <= 0){ log('机缘尚未刷新，请稍后再来。'); renderChance(); return; }
+  state.chanceCount--;
+  // 灵玉：每次触发机缘有 5% 概率额外获得 1 灵玉
+  if (Math.random() * 100 < 5){
+    state.jade = (state.jade || 0) + 1;
+    log('机缘·天降灵玉：获得 1 灵玉！');
+  }
+  const roll = Math.random() * 100;
+  if (roll < 50) eventResource();      // 50% 获得资源
+  else if (roll < 75) eventTrap();     // 25% 遭遇陷阱
+  else eventBattle();                  // 25% 遭遇战斗
+  renderChance(); save();
+}
+function eventResource(){
+  const layers = stageIndex() + 1;
+  if (Math.random() * 100 < 10){
+    // 丹药奖励（资源事件的极小概率 10%）；洗髓丹/悟道茶只能商店购买
+    const pill = Math.random() < 0.5 ? '聚气丹' : '破境丹';
+    const got = grantPill(pill);
+    log('机缘·奇遇：获得【' + got + '】×1！');
+    showResultModal('机缘 · 奇遇', '你在一处上古遗迹中寻得一枚【' + got + '】！');
+  } else {
+    const gain = layers * 50 + randInt(50, 200);
+    state.stones += gain;
+    log('机缘·奇遇：获得 ' + fmt(gain) + ' 灵石。');
+    showResultModal('机缘 · 奇遇', '你偶遇灵脉矿藏，挖得 ' + fmt(gain) + ' 灵石！');
+  }
+  render(); save();
+}
+function eventTrap(){
+  const isCult = Math.random() < 0.5;
+  if (isCult){
+    const lost = state.cultivation * 0.1;
+    state.cultivation = Math.max(0, state.cultivation - lost);
+    log('机缘·陷阱：误入幻阵，修为损失 ' + fmt(lost) + '。');
+    showResultModal('机缘 · 陷阱', '你误入幻阵，修为损失 ' + fmt(lost) + '！');
+  } else {
+    let lost = Math.floor(state.stones * 0.1);
+    lost = Math.max(lost, 10);
+    lost = Math.min(lost, 200);
+    lost = Math.min(lost, state.stones);
+    state.stones -= lost;
+    log('机缘·陷阱：遭遇盗匪，被劫去 ' + fmt(lost) + ' 灵石。');
+    showResultModal('机缘 · 陷阱', '你遭遇盗匪，被劫去 ' + fmt(lost) + ' 灵石！');
+  }
+  render(); save();
+}
+function eventBattle(){
+  const offsets = [-1, 0, 1, 2];
+  const off = offsets[Math.floor(Math.random() * offsets.length)];
+  const enemyStage = Math.max(0, Math.min(161, stageIndex() + off));
+  const winRate = off === -1 ? 90 : off === 0 ? 60 : off === 1 ? 30 : 10;
+  currentBattle = {off, enemyStage, winRate};
+  const enemyLabel = stageToLabel(enemyStage);
+  const warn = winRate <= 10 ? '<div class="battle-warn">对方境界太高，建议逃跑</div>' : '';
+  openModal('机缘 · 遭遇战斗',
+    '<div class="battle-box">' +
+      '<div class="battle-line">你遭遇了【' + enemyLabel + '】的妖兽！</div>' +
+      '<div class="battle-line">胜率：<b class="battle-rate">' + winRate + '%</b></div>' +
+      warn +
+    '</div>',
+    '<button class="btn" onclick="battleFlee()">逃跑</button>' +
+    '<button class="btn primary" onclick="battleFight()">应战</button>');
+}
+function battleFlee(){
+  if (!currentBattle) return;
+  currentBattle = null;
+  closeModal();
+  log('你选择逃跑，本次机缘作废，无奖励无惩罚。');
+  render(); save();
+}
+function battleFight(){
+  const b = currentBattle;
+  if (!b) return;
+  currentBattle = null;
+  closeModal();
+  const enemyLabel = stageToLabel(b.enemyStage);
+  if (Math.random() * 100 < b.winRate){
+    const cap = getCap();
+    const xiu = cap * 0.1;
+    state.cultivation += xiu;
+    const layers = stageIndex() + 1;
+    const stones = layers * 30 + randInt(20, 100);
+    state.stones += stones;
+    let extra = '';
+    if (Math.random() * 100 < 5){
+      grantPill('破境丹');
+      extra = ' 并掉落一颗【破境丹】！';
+    }
+    log('战斗胜利，获得修为 +' + fmt(xiu) + '、灵石 +' + fmt(stones) + extra);
+    showResultModal('战斗胜利', '你与【' + enemyLabel + '】的妖兽苦战，最终将其击杀，获得修为 +' + fmt(xiu) + '，灵石 +' + fmt(stones) + '！' + extra);
+    playSuccess();
+  } else {
+    const cap = getCap();
+    const xiuLoss = Math.min(state.cultivation, cap * 0.15);
+    state.cultivation = Math.max(0, state.cultivation - xiuLoss);
+    let stoneLoss = Math.floor(state.stones * 0.05);
+    stoneLoss = Math.max(stoneLoss, 50);
+    stoneLoss = Math.min(stoneLoss, 500);
+    stoneLoss = Math.min(stoneLoss, state.stones);
+    state.stones -= stoneLoss;
+    log('战斗失败，损失修为 ' + fmt(xiuLoss) + '、灵石 ' + fmt(stoneLoss) + '。');
+    showResultModal('战斗失败', '你不敌【' + enemyLabel + '】的妖兽，仓皇逃窜，损失修为 ' + fmt(xiuLoss) + '，灵石 ' + fmt(stoneLoss) + '。');
+    playFail();
+  }
+  render(); save();
+}
+function renderChance(){
+  const countEl = document.getElementById('chanceCount');
+  const cdEl = document.getElementById('chanceCountdown');
+  const btn = document.getElementById('chanceBtn');
+  const badge = document.getElementById('quickChanceCount');
+  if (countEl) countEl.textContent = state.chanceCount;
+  if (badge) badge.textContent = state.chanceCount;
+  if (cdEl) cdEl.textContent = fmtDur(chanceCountdownMs() / 1000) + ' 后刷新';
+  if (btn){
+    btn.disabled = state.chanceCount <= 0;
+    btn.textContent = state.chanceCount <= 0 ? '机缘未刷新' : '触发机缘';
+  }
+}
+
+/* ================= 签到 ================= */
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function yesterdayStr(){
+  const d = new Date(Date.now() - 86400000);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function hasSignedToday(){
+  return state.lastSignDate === todayStr();
+}
+function doSignIn(){
+  if (hasSignedToday()){ log('今日已签到，请明日再来。'); return null; }
+  const today = todayStr();
+  if (state.lastSignDate === yesterdayStr()){
+    state.signStreak = (state.signStreak || 0) + 1;
+  } else {
+    state.signStreak = 1;
+  }
+  state.lastSignDate = today;
+  const stones = randInt(10000, 30000); // 每天 1~3 万灵石（随机）
+  state.stones += stones;
+  const dayInCycle = ((state.signStreak - 1) % 7) + 1;
+  // 每天基础 2 灵玉；连续第 3/5/7 天额外 +3/+5/+7 灵玉（断签重新计数）
+  let jadeGain = 2;
+  if (dayInCycle === 3) jadeGain += 3;
+  else if (dayInCycle === 5) jadeGain += 5;
+  else if (dayInCycle === 7) jadeGain += 7;
+  state.jade = (state.jade || 0) + jadeGain;
+  const msg = '签到成功（连续第 ' + state.signStreak + ' 天）：灵石 +' + fmt(stones) + '，灵玉 +' + jadeGain +
+    (jadeGain > 2 ? '（含第 ' + dayInCycle + ' 天额外奖励）' : '');
+  log(msg);
+  render(); save();
+  return msg;
+}
+function openSignModal(){
+  const signed = hasSignedToday();
+  const streak = state.signStreak || 0;
+  openModal('每日签到',
+    '<div class="result-box" style="text-align:left;">' +
+      (signed
+        ? '今日已签到（连续 ' + streak + ' 天），请明日再来。'
+        : '今日连续签到第 <b>' + (streak + 1) + '</b> 天' +
+          '<br>每日奖励：2 灵玉 + 1~3 万灵石（随机）' +
+          '<br>第 3 天额外 +3 灵玉 · 第 5 天 +5 灵玉 · 第 7 天 +7 灵玉' +
+          '<br><span style="color:#b0662a;">断签将重新计数</span>') +
+    '</div>',
+    signed
+      ? '<button class="btn primary" onclick="closeModal()">关闭</button>'
+      : '<button class="btn primary" onclick="confirmSign()">签到</button>');
+}
+function confirmSign(){
+  const msg = doSignIn();
+  if (msg){
+    closeModal();
+    showResultModal('签到成功', msg);
+  }
+}
+function renderSign(){
+  const btn = document.getElementById('signBtn');
+  const hint = document.getElementById('signHint');
+  if (btn){
+    btn.disabled = hasSignedToday();
+    btn.textContent = hasSignedToday() ? '今日已签到' : '每日签到';
+  }
+  if (hint){
+    hint.textContent = '连续签到 ' + (state.signStreak || 0) + ' 天' + (hasSignedToday() ? ' · 已签到' : ' · 今日未签到');
+  }
+}
+
+/* ================= 抽卡 ================= */
+function gachaBonus(type){ return (state.gacha && state.gacha.bonuses && state.gacha.bonuses[type]) || 0; }
+function gachaCap(type, val){
+  if (type === 'breakthrough') return Math.min(val, 100);        // 突破率封顶100%
+  if (type === 'fishing' || type === 'alchemy') return Math.min(val, 50); // 钓鱼/炼丹封顶50%
+  return val;                                                    // 修炼速度无上限
+}
+function applyGachaBonus(item){
+  const cur = gachaBonus(item.bonusType);
+  state.gacha.bonuses[item.bonusType] = gachaCap(item.bonusType, cur + item.bonus);
+}
+function rollGachaRarity(pool){
+  const rates = pool.rarityRates;
+  let r = Math.random(), acc = 0;
+  for (const rarity of GACHA_RARITIES){
+    acc += rates[rarity] || 0;
+    if (r < acc) return rarity;
+  }
+  return '普通';
+}
+function gachaDrawOne(pool, gs){
+  // 每抽计数器 +1（十连会连续调用 10 次，计数器自然 +10）
+  gs.pity = (gs.pity || 0) + 1;
+  if (pool.pity2) gs.pity2 = (gs.pity2 || 0) + 1;
+  let rarity;
+  if (pool.pity2 && gs.pity2 >= pool.pity2){
+    // 普通池：120 抽硬保底必出极品
+    rarity = pool.pity2Rarity;
+  } else if (gs.pity >= pool.pity){
+    // 60 抽保底：普通池必出优品，高级池必出极品
+    rarity = pool.pityRarity;
+  } else {
+    rarity = rollGachaRarity(pool);
+  }
+  // 计数器重置：极品清空双计数；优品只清空优品计数（极品计数继续累计）
+  if (pool.pity2 && rarity === pool.pity2Rarity) gs.pity2 = 0;
+  if (rarity === pool.pityRarity || (pool.pity2 && rarity === pool.pity2Rarity)) gs.pity = 0;
+  let candidates = pool.items.filter(i => i.rarity === rarity);
+  // 防御：若该品阶在池中没有物品，按品阶顺序就近回退，绝不让 item 为 undefined
+  if (!candidates.length){
+    const idx = GACHA_RARITIES.indexOf(rarity);
+    for (let d = 1; d < GACHA_RARITIES.length && !candidates.length; d++){
+      for (const dir of [-1, 1]){
+        const r2 = GACHA_RARITIES[idx + d * dir];
+        if (!r2) continue;
+        candidates = pool.items.filter(i => i.rarity === r2);
+        if (candidates.length) break;
+      }
+    }
+  }
+  const item = candidates[Math.floor(Math.random() * candidates.length)];
+  return {item, rarity};
+}
+function processGachaItem(pool, item){
+  if (state.gacha.collection.includes(item.id)){
+    const val = DUPE_CONVERT[pool.currency][item.rarity];
+    const unit = pool.currency === 'jade' ? '灵玉' : '灵石';
+    if (pool.currency === 'jade') state.jade = (state.jade || 0) + val;
+    else state.stones += val;
+    return {dup:true, item, val, unit};
+  }
+  state.gacha.collection.push(item.id);
+  applyGachaBonus(item);
+  return {dup:false, item};
+}
+function doGacha(poolId, count){
+  const pool = GACHA_POOLS.find(p => p.id === poolId);
+  if (!pool) return;
+  count = parseInt(count, 10);
+  if (!count || count < 1) count = 1;
+  if (count > 10) count = 10;
+  const gs = pool.id === 'normal' ? state.gacha.normal : state.gacha.premium;
+  // 十连固定用十连价，一次点击只扣一次资源
+  const cost = count >= 10 ? pool.tenCost : pool.cost * count;
+  if (pool.currency === 'jade'){
+    if ((state.jade || 0) < cost){ alert('灵玉不足（需要 ' + cost + ' 灵玉）'); return; }
+    state.jade -= cost;
+  } else {
+    if (state.stones < cost){ alert('灵石不足（需要 ' + fmt(cost) + ' 灵石）'); return; }
+    state.stones -= cost;
+  }
+  // 一次性连续抽取 count 次（十连 = 连续 10 抽，保底计数器各 +1/抽）
+  const results = [];
+  for (let i = 0; i < count; i++){
+    const {item, rarity} = gachaDrawOne(pool, gs);
+    const r = processGachaItem(pool, item);
+    results.push({item, rarity, dup:r.dup, val:r.val, unit:r.unit});
+  }
+  showGachaResult(results, count);
+  render(); save();
+}
+function doFreeDraw(){
+  const pool = GACHA_POOLS.find(p => p.id === 'normal');
+  if (!pool) return;
+  const gs = state.gacha.normal;
+  if (gs.lastFreeDate === todayStr()){ alert('今日免费抽卡已使用'); return; }
+  gs.lastFreeDate = todayStr();
+  const {item, rarity} = gachaDrawOne(pool, gs);
+  const r = processGachaItem(pool, item);
+  showGachaResult([{item, rarity, dup:r.dup, val:r.val, unit:r.unit}], 1);
+  render(); save();
+}
+function showGachaResult(results, count){
+  let html = '<div class="gacha-result">';
+  results.forEach(r => {
+    const dupText = r.dup ? '（已拥有，自动转化为 ' + fmt(r.val) + ' ' + r.unit + '）' : '';
+    const rarityLabel = r.item.rarity === '稀品' ? '金色稀品' : r.item.rarity;
+    html += '<div class="gacha-line r-' + r.item.rarity + '">[' + rarityLabel + '] ' + r.item.name + dupText + '</div>';
+  });
+  html += '</div>';
+  openModal('抽卡结果', html, '<button class="btn primary" onclick="closeModal()">知道了</button>');
+}
+function gachaBonusText(item){
+  const b = item.bonus.toFixed(1);
+  switch(item.bonusType){
+    case 'cultivation': return item.type + ' · 修炼速度永久 +' + b + '%';
+    case 'breakthrough': return item.type + ' · 突破率永久 +' + b + '%';
+    case 'fishing': return item.type + ' · 钓鱼概率永久 +' + b + '%';
+    case 'alchemy': return item.type + ' · 炼丹概率永久 +' + b + '%';
+    default: return item.type;
+  }
+}
+function showGachaTip(el, id){
+  const item = GACHA_POOLS.flatMap(p => p.items).find(i => i.id === id);
+  if (!item) return;
+  const tip = document.getElementById('gachaTip');
+  if (!tip) return;
+  const owned = state.gacha.collection.includes(id);
+  const rarityLabel = item.rarity === '稀品' ? '金色稀品' : item.rarity;
+  tip.innerHTML = '<div class="gacha-tip-name g-r-' + item.rarity + '">' + item.name +
+                  ' <span class="gacha-tip-rarity">- ' + rarityLabel + (owned ? ' · 已拥有' : ' · 未获得') + '</span></div>' +
+                  '<div class="gacha-tip-effect">' + gachaBonusText(item) + '</div>';
+  tip.classList.add('show');
+  // fixed 定位：以视口为参照，池子预览与图鉴内的物品都能正确弹出
+  const rect = el.getBoundingClientRect();
+  const tipW = tip.offsetWidth, tipH = tip.offsetHeight;
+  let left = rect.left + rect.width / 2 - tipW / 2;
+  let top = rect.top - tipH - 8;
+  if (top < 4) top = rect.bottom + 8; // 上方放不下就放下方
+  left = Math.max(4, Math.min(left, window.innerWidth - tipW - 4));
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+}
+function gachaPoolPreviewHTML(pool){
+  // 池子图鉴预览：展示该池所有物品；未抽到灰显，已抽到彩色
+  return '<div class="pool-preview">' +
+    '<div class="pool-preview-title">池子图鉴预览（灰色 = 未抽到，彩色 = 已抽到）</div>' +
+    '<div class="gacha-collection">' +
+      pool.items.map(i => {
+        const owned = state.gacha.collection.includes(i.id);
+        return '<span class="gacha-tag gacha-item g-r-' + i.rarity + (owned ? ' owned' : ' g-unowned') + '" data-gid="' + i.id + '">' + i.name + '</span>';
+      }).join('') +
+    '</div></div>';
+}
+function fmtGachaRate(v){
+  const p = (v || 0) * 100;
+  return Number(p.toFixed(2)) + '%';
+}
+function gachaRateText(pool){
+  return GACHA_RARITIES.filter(r => (pool.rarityRates[r] || 0) > 0)
+    .map(r => (r === '稀品' ? '金色稀品' : r) + ' ' + fmtGachaRate(pool.rarityRates[r] || 0)).join(' · ');
+}
+function renderGacha(){
+  const b = state.gacha.bonuses;
+  document.getElementById('bonusCult').textContent = '+' + (b.cultivation || 0).toFixed(1) + '%';
+  document.getElementById('bonusBreak').textContent = '+' + (b.breakthrough || 0).toFixed(1) + '%（封顶100%）';
+  document.getElementById('bonusFish').textContent = '+' + (b.fishing || 0).toFixed(1) + '%（封顶50%）';
+  document.getElementById('bonusAlch').textContent = '+' + (b.alchemy || 0).toFixed(1) + '%（封顶50%）';
+
+  const container = document.getElementById('gachaPools');
+  let html = '';
+  GACHA_POOLS.forEach(pool => {
+    const gs = pool.id === 'normal' ? state.gacha.normal : state.gacha.premium;
+    const unit = pool.currency === 'jade' ? '灵玉' : '灵石';
+    const freeUsed = pool.freeDaily && gs.lastFreeDate === todayStr();
+    let pity2Line = '';
+    if (pool.pity2){
+      const p2name = pool.pity2Label || pool.pity2Rarity;
+      const grad = pool.pity2Rarity === '稀品'
+        ? 'linear-gradient(90deg,#e6c069,#b8860b)'
+        : 'linear-gradient(90deg,#b08ad0,#7a4fb0)';
+      pity2Line = '<div class="gacha-pity">' + p2name + '保底：<b>' + (gs.pity2 || 0) + '</b>/' + pool.pity2 + '</div>' +
+        '<div class="progress-wrap" style="height:8px;margin:6px 0;"><div style="height:100%;width:' + Math.min(100, (gs.pity2 || 0) / pool.pity2 * 100) + '%;background:' + grad + ';border-radius:999px;"></div></div>';
+    }
+    html += '<div class="card">' +
+      '<div class="sec-title">' + pool.name + '</div>' +
+      '<div class="gacha-pity">' + pool.pityRarity + '保底：<b>' + gs.pity + '</b>/' + pool.pity + '</div>' +
+      '<div class="progress-wrap" style="height:8px;margin:6px 0;"><div style="height:100%;width:' + Math.min(100, gs.pity / pool.pity * 100) + '%;background:linear-gradient(90deg,#c08a5a,#8a4b3a);border-radius:999px;"></div></div>' +
+      pity2Line +
+      '<div class="gacha-btns">' +
+        (pool.freeDaily ? '<button class="btn small" data-free="1"' + (freeUsed ? ' disabled' : '') + '>' + (freeUsed ? '免费抽已用' : '免费一抽') + '</button>' : '') +
+        '<button class="btn small" data-gacha="' + pool.id + ':1">单抽 ' + fmt(pool.cost) + ' ' + unit + '</button>' +
+        '<button class="btn small primary" data-gacha="' + pool.id + ':10">十连 ' + fmt(pool.tenCost) + ' ' + unit + '</button>' +
+      '</div>' +
+      '<button class="gacha-info-link" data-pool-info="' + pool.id + '">查看本池概率与图鉴 ›</button>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+  container.querySelectorAll('[data-gacha]').forEach(b => {
+    b.onclick = () => { const arr = b.dataset.gacha.split(':'); doGacha(arr[0], parseInt(arr[1], 10)); };
+  });
+  const freeBtn = container.querySelector('[data-free]');
+  if (freeBtn) freeBtn.onclick = doFreeDraw;
+  container.querySelectorAll('[data-pool-info]').forEach(b => {
+    b.onclick = () => openGachaInfo(b.dataset.poolInfo);
+  });
+
+  // 图鉴默认收起，只显示收集进度，点击按钮查看全部物品与概率
+  const all = GACHA_POOLS.flatMap(p => p.items);
+  const owned = all.filter(i => state.gacha.collection.includes(i.id)).length;
+  const summaryEl = document.getElementById('gachaCollectionSummary');
+  if (summaryEl) summaryEl.textContent = '已收集 ' + owned + ' / ' + all.length + ' 件 · 概率与全部图鉴请点击按钮查看';
+}
+function openGachaInfo(poolId){
+  const pools = poolId ? GACHA_POOLS.filter(p => p.id === poolId) : GACHA_POOLS;
+  let body = '';
+  pools.forEach(pool => {
+    const gs = pool.id === 'normal' ? state.gacha.normal : state.gacha.premium;
+    const p2name = pool.pity2 ? (pool.pity2Label || pool.pity2Rarity) : '';
+    body += '<div class="gacha-info-pool">' +
+      '<div class="gacha-info-name">' + pool.name + '</div>' +
+      '<div class="gacha-info-rate">概率：' + gachaRateText(pool) + '</div>' +
+      '<div class="gacha-info-pity">' + pool.pity + ' 抽保底' + pool.pityRarity +
+        (pool.pity2 ? ' · ' + pool.pity2 + ' 抽保底' + p2name : '') +
+        '<br>当前进度：' + gs.pity + '/' + pool.pity + (pool.pity2 ? ' · ' + (gs.pity2 || 0) + '/' + pool.pity2 : '') +
+      '</div>';
+    GACHA_RARITIES.forEach(rar => {
+      const items = pool.items.filter(i => i.rarity === rar);
+      if (!items.length) return;
+      const ownedCnt = items.filter(i => state.gacha.collection.includes(i.id)).length;
+      const label = rar === '稀品' ? '金色稀品' : rar;
+      body += '<div class="col-group">' +
+        '<div class="col-group-title g-r-' + rar + '">' + label + '（' + ownedCnt + '/' + items.length + '）</div>' +
+        '<div class="gacha-collection">' +
+          items.map(i => {
+            const owned = state.gacha.collection.includes(i.id);
+            return '<span class="gacha-tag gacha-item g-r-' + rar + (owned ? ' owned' : ' g-unowned') +
+              '" data-gid="' + i.id + '" title="' + esc(gachaBonusText(i)) + '">' + i.name + '</span>';
+          }).join('') +
+        '</div></div>';
+    });
+    body += '<div class="gacha-info-tip">灰色 = 未获得，彩色 = 已获得；点击物品可查看具体加成。重复物品会自动转化为灵石/灵玉。</div>' +
+      '</div>';
+  });
+  openModal('概率与图鉴', body, '<button class="btn primary" onclick="closeModal()">知道了</button>');
+  const modalBody = document.getElementById('modal-body');
+  if (modalBody) bindGachaTips(modalBody);
+}
+function bindGachaTips(rootEl){
+  rootEl.querySelectorAll('.gacha-item').forEach(el => {
+    el.onclick = (e) => { e.stopPropagation(); showGachaTip(el, el.dataset.gid); };
+  });
+}
+
+/* ================= 渲染 ================= */
+function fastRender(){
+  const cap = getCap();
+  const info = getRateInfo();
+  const maxed = info.target === null;
+
+  document.getElementById('realmName').textContent = REALMS[state.realm];
+  document.getElementById('layerName').textContent = LAYERS[state.layer - 1] + '层';
+  const rootEl = document.getElementById('spiritRoot');
+  rootEl.textContent = state.root;
+  rootEl.className = 'badge root-' + state.root;
+  document.getElementById('cultivation').textContent = fmt(state.cultivation);
+  document.getElementById('cultCap').textContent = fmt(cap);
+  document.getElementById('stones').textContent = fmt(state.stones);
+  document.getElementById('jade').textContent = fmt(state.jade);
+  document.getElementById('speed').textContent = fmtSpeed(getIncome());
+
+  const pct = Math.min(100, state.cultivation / cap * 100);
+  document.getElementById('progress').style.width = pct.toFixed(2) + '%';
+
+  const btn = document.getElementById('breakBtn');
+  const hint = document.getElementById('breakHint');
+  const overHint = document.getElementById('overflowHint');
+  overHint.style.display = (state.cultivation > cap && !maxed) ? 'block' : 'none';
+  if (maxed){
+    btn.textContent = '已至道祖圆满';
+    btn.disabled = true;
+    hint.textContent = '大道已成，举世无敌。';
+  } else {
+    btn.disabled = state.cultivation < cap;
+    const lack = state.cultivation < cap ? ' · 修为不足' : '';
+    btn.textContent = (info.isTrib ? '渡 劫' : '突 破') + lack;
+    const bp = getBreakPillCount(state.realm);
+    const maxRate = calcBreakRate(bp);
+    const rateLine = '基础成功率 ' + info.rate + '% · 本境界破境丹×' + bp +
+      '（勾选后最高 ' + maxRate + '%）';
+    if (info.isTrib){
+      hint.textContent = '渡劫！' + rateLine + ' · 失败将掉落一个小境界' +
+        (state.hudaofu > 0 ? '（护道符×' + state.hudaofu + ' 可保）' : '');
+    } else {
+      hint.textContent = rateLine + ' · 消耗 ' + fmt(cap) + ' 修为 · 失败损失当前修为 20%';
+    }
+  }
+
+  document.getElementById('rootName').textContent = state.root;
+  document.getElementById('rootBonus').textContent = rootBonusText(state.root);
+  document.getElementById('pojingCount').textContent = getBreakPillCount(state.realm);
+  document.getElementById('hudaofuCount').textContent = state.hudaofu;
+  document.getElementById('teaStatus').textContent =
+    state.wudaoRemain > 0 ? fmtDur(state.wudaoRemain) + ' 内速度×2' : '未服用';
+  document.getElementById('zaohuaStatus').textContent =
+    state.zaohuaRemain > 0 ? fmtDur(state.zaohuaRemain) + ' 内速度×3' : '未服用';
+  document.getElementById('xisuiProgress').textContent =
+    Math.min(20, Math.max(0, Math.floor(state.xiSuiCount || 0))) + '/20';
+
+  document.getElementById('fishBtn').textContent = state.fishing ? '停止钓鱼' : '开始钓鱼';
+  document.getElementById('fishProgress').textContent = state.fishing
+    ? '下一条鱼：' + (10 - state.fishingProgress).toFixed(1) + ' 秒'
+    : '点击按钮开始垂钓，每 10 秒收获一条鱼';
+  const jadeBonus = jadeFishBonusW();
+  document.getElementById('luckyRodTag').textContent =
+    '鱼竿加成 +' + rodBonusSum().toFixed(1) + '%（加法叠加） · 稀有鱼倍率 ×' + fishLuckMult().toFixed(2) +
+    (jadeBonus > 0 ? ' · 灵玉鱼概率额外 +' + jadeBonus.toFixed(1) + '%' : '');
+
+  // 炼丹状态 / 等级经验 / 倒计时进度条
+  updateAlchemyUI();
+
+  renderSign();
+  renderChance();
+  if (logDirty){ renderLog(); logDirty = false; }
+}
+function renderFish(){
+  const list = document.getElementById('fishList');
+  let html = '<div class="fish-row head"><span>鱼种</span><span>数量</span><span>单价</span><span></span></div>';
+  FISH.forEach(f => {
+    const cnt = state.fish[f.name] || 0;
+    html += '<div class="fish-row">' +
+      '<span class="fish-name' + (f.rare ? ' rare' : '') + '">' + f.name + '</span>' +
+      '<span>×' + cnt + '</span>' +
+      '<span class="fish-price">' + fmt(f.price) + (f.currency === 'jade' ? ' 灵玉' : ' 灵石') + '</span>' +
+      '<button class="btn small" data-sell="' + f.name + '"' + (cnt <= 0 ? ' disabled' : '') + '>出售</button>' +
+      '</div>';
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('[data-sell]').forEach(b => {
+    b.onclick = () => openSellModal('fish', b.dataset.sell);
+  });
+}
+function renderGarden(){
+  const el = document.getElementById('gardenPlots');
+  let html = '';
+  state.garden.forEach((p, i) => {
+    if (!p){
+      html += '<div class="plot">' +
+        '<div class="plot-name">第 ' + (i + 1) + ' 块地 · 空地</div>' +
+        '<div class="plot-actions">' +
+        HERBS.map(h => {
+          const have = (state.seeds && state.seeds[h.name]) || 0;
+          return '<button class="btn small" data-plant="' + i + ':' + h.name + '"' + (have > 0 ? '' : ' disabled') + '>' +
+            '种' + h.name + '<br><span style="color:var(--ink-2);font-size:.76rem;">' + fmtDur(h.grow) + ' · 种子×' + have + '</span></button>';
+        }).join('') +
+        '</div></div>';
+    } else {
+      const ready = plotReady(p);
+      if (ready){
+        html += '<div class="plot mature">' +
+          '<div class="plot-name">第 ' + (i + 1) + ' 块地 · ' + p.type + '（已成熟）</div>' +
+          '<button class="btn small green" data-harvest="' + i + '">收获</button></div>';
+      } else {
+        const h = herbByName(p.type);
+        const rem = plotRemaining(p);
+        const pct = Math.max(0, Math.min(100, (1 - rem / h.grow) * 100));
+        html += '<div class="plot">' +
+          '<div class="plot-name">第 ' + (i + 1) + ' 块地 · ' + p.type + '</div>' +
+          '<div class="plot-progress"><div style="width:' + pct.toFixed(1) + '%"></div></div>' +
+          '<div class="plot-remaining">剩余 ' + fmtDur(rem) + '</div>' +
+          '<div class="plot-actions" style="margin-top:8px;"><button class="btn small danger" data-uproot="' + i + '">取消种植</button></div></div>';
+      }
+    }
+  });
+  el.innerHTML = html;
+  el.querySelectorAll('[data-plant]').forEach(b => {
+    b.onclick = () => { const arr = b.dataset.plant.split(':'); plantHerb(parseInt(arr[0], 10), arr[1]); };
+  });
+  el.querySelectorAll('[data-harvest]').forEach(b => {
+    b.onclick = () => harvestPlot(parseInt(b.dataset.harvest, 10));
+  });
+  el.querySelectorAll('[data-uproot]').forEach(b => {
+    b.onclick = () => uprootPlot(parseInt(b.dataset.uproot, 10));
+  });
+}
+function renderHerbs(){
+  const el = document.getElementById('herbList');
+  let html = '<div class="fish-row head"><span>草药</span><span>数量</span><span>单价</span><span></span></div>';
+  HERBS.forEach(h => {
+    const cnt = state.herbs[h.name] || 0;
+    html += '<div class="fish-row">' +
+      '<span class="fish-name">' + h.name + '</span>' +
+      '<span>×' + cnt + '</span>' +
+      '<span class="fish-price">' + fmt(h.sell) + ' 灵石</span>' +
+      '<button class="btn small" data-sell-herb="' + h.name + '"' + (cnt <= 0 ? ' disabled' : '') + '>出售</button></div>';
+  });
+  el.innerHTML = html;
+  el.querySelectorAll('[data-sell-herb]').forEach(b => b.onclick = () => openSellModal('herb', b.dataset.sellHerb));
+}
+function renderAlchemy(){
+  updateAlchemyUI();
+
+  const list = document.getElementById('recipeList');
+  let html = '';
+  RECIPES.forEach(rec => {
+    const bonus = state.realm * 5;
+    const rate = Math.min(99, rec.base + bonus + gachaBonus('alchemy'));
+    const have = state.herbs[rec.herb] || 0;
+    const unlocked = (state.alchemyLevel || 1) >= rec.unlock;
+    const active = !!(state.alchemy && (state.alchemy.recipeId === rec.id || state.alchemy.recipe === rec.name));
+    const can = unlocked && !state.alchemy && have >= rec.need;
+    html += '<div class="recipe-item">' +
+      '<div class="recipe-info">' +
+        '<div class="recipe-name">' + rec.name + (unlocked ? '' : ' <span class="recipe-rate">需 ' + rec.unlock + ' 级</span>') + '</div>' +
+        '<div class="recipe-desc">' + rec.desc + '（现有 ' + have + '）</div>' +
+        '<div class="recipe-rate">基础 ' + rec.base + '% + 境界 ' + bonus + '% + 丹道 ' + gachaBonus('alchemy') + '% = 总 ' + rate + '%</div>' +
+      '</div>' +
+      '<button class="btn small primary" data-recipe="' + rec.id + '"' + (can ? '' : ' disabled') + '>' + (active ? '炼制中…' : '炼制') + '</button>' +
+      '</div>';
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('[data-recipe]').forEach(b => b.onclick = () => startAlchemy(b.dataset.recipe));
+
+  const stage = stageIndex();
+  const juqiUsed = Math.max(0, Math.floor(state.juqiUsed[stage] || 0));
+  const pity = Math.min(20, Math.max(0, Math.floor(state.xiSuiCount || 0)));
+  const pills = [
+    {name:'聚气丹', count:state.dans['聚气丹'] || 0, usable:true, note:'增加当前境界上限 10% 修为 · 本境界 ' + juqiUsed + '/5（每境界限 5 颗）'},
+    {name:'造化丹', count:state.dans['造化丹'] || 0, usable:true, note:'服用后 2 小时内修炼速度×3（不直接加修为，可叠加时间）'},
+    {name:'悟道茶', count:state.dans['悟道茶'] || 0, usable:true, note:'服用后 1 小时内修炼速度×2（可叠加时间）'},
+    {name:'洗髓丹', count:state.dans['洗髓丹'] || 0, usable:true, note:'重随灵根 · 20 次保底天灵根 · 当前 ' + pity + '/20'},
+    {name:'九转洗髓丹', count:state.dans['九转洗髓丹'] || 0, usable:true, note:'重随灵根并累计保底 · 当前 ' + pity + '/20'}
+  ];
+  // 所有境界的破境丹都展示出来，明确标注只能用于对应境界
+  REALMS.forEach((r, i) => {
+    const c = getBreakPillCount(i);
+    if (c > 0){
+      pills.push({
+        name: realmBreakName(i), count: c, usable: false,
+        note: (i === state.realm ? '本境界突破可用' : '仅限' + r + '突破，当前境界不可用') + ' · 突破弹窗勾选 +15%/枚'
+      });
+    }
+  });
+  if ((state.dans['九转金丹'] || 0) > 0){
+    pills.push({name:'九转金丹', count:state.dans['九转金丹'], usable:true, note:'旧版丹药 · 服用后修为 +当前上限 50%'});
+  }
+  if ((state.daluoxianDan || 0) > 0){
+    pills.push({name:'大罗仙丹', count:state.daluoxianDan, usable:true, note:'旧版丹药 · 手动服用后，下次突破成功率 +30%（可叠加破境丹）'});
+  }
+  const pillEl = document.getElementById('pillList');
+  let ph = '';
+  pills.forEach(p => {
+    const sellPrice = pillSellPrice(p.name);
+    ph += '<div class="pill-row">' +
+      '<div class="pill-info"><div class="pill-name">' + p.name + '</div>' +
+      '<div class="pill-note">' + p.note + ' · 出售 ' + fmt(sellPrice) + ' 灵石</div></div>' +
+      '<span class="pill-count">×' + p.count + '</span>' +
+      (p.usable
+        ? '<button class="btn small green" data-use="' + p.name + '"' + (p.count <= 0 ? ' disabled' : '') + '>服用</button>'
+        : '<span class="fish-price" style="min-width:56px;">突破时选</span>') +
+      '<button class="btn small" data-sell-pill="' + p.name + '"' + (p.count <= 0 ? ' disabled' : '') + '>出售</button>' +
+      '</div>';
+  });
+  pillEl.innerHTML = ph;
+  pillEl.querySelectorAll('[data-use]').forEach(b => b.onclick = () => usePill(b.dataset.use));
+  pillEl.querySelectorAll('[data-sell-pill]').forEach(b => b.onclick = () => openSellModal('pill', b.dataset.sellPill));
+}
+function renderShop(){
+  const list = document.getElementById('shopList');
+  const boughtTea = state.lastWudaoBuyDate === todayStr();
+  const items = [
+    {name:'聚气丹', price:800, desc:'放入背包 · 每颗增加当前境界上限 10% 修为，每个小境界限服 5 颗', count:state.dans['聚气丹'] || 0, buy:'聚气丹'},
+    {name:realmBreakName(state.realm), price:5000, desc:'放入背包 · 仅限当前【' + REALMS[state.realm] + '】突破使用，突破弹窗中勾选，每枚 +15%', count:getBreakPillCount(state.realm), buy:'破境丹'},
+    {name:'悟道茶', price:3000, desc:'每日限购 1 个，购买立刻生效（不存背包）· 接下来 1 小时修炼速度翻倍，可叠加时间', daily:true, soldout:boughtTea, buy:'悟道茶'},
+    {name:'洗髓丹', price:50000, desc:'放入背包 · 重随灵根，20 次保底必出天灵根 · 当前 ' + Math.min(20, Math.max(0, Math.floor(state.xiSuiCount || 0))) + '/20', count:state.dans['洗髓丹'] || 0, buy:'洗髓丹'},
+    {name:'护道符', price:8000, desc:'渡劫失败时，免除掉落小境界的惩罚', count:state.hudaofu, buy:'护道符'}
+  ];
+  RODS.forEach(r => {
+    const cnt = (state.rods && state.rods[r.id]) || 0;
+    // 每种鱼竿独立限购 1 根：买过就不再显示购买按钮
+    items.push({name:r.name, price:r.price, desc:r.desc + (cnt > 0 ? '（已拥有）' : '（限购 1 根）'), rod:r.id, soldout: cnt >= 1});
+  });
+  items.push({heading:'草药种子 · 种在药园，成熟后收获', seedHead:true});
+  HERBS.forEach(h => {
+    items.push({
+      name:h.name + '种子', price:h.seedPrice || Math.max(1, Math.round(h.sell / 5)),
+      desc:'种在药园，' + fmtDur(h.grow) + '后成熟，收获 1 株【' + h.name + '】',
+      count:(state.seeds && state.seeds[h.name]) || 0, seed:h.name
+    });
+  });
+  let html = '';
+  items.forEach(it => {
+    if (it.heading){
+      html += '<div class="shop-group-title"' + (it.seedHead ? ' data-seed-head="1"' : '') + '>' + it.heading + '</div>';
+      return;
+    }
+    const countTag = it.count !== undefined ? ' <span class="tag" style="margin:0;">拥有 ' + it.count + '</span>' : '';
+    let btn;
+    if (it.rod !== undefined){
+      btn = it.soldout
+        ? '<span class="fish-price">已拥有</span>'
+        : '<button class="btn small" data-rod="' + it.rod + '"' + (state.stones < it.price ? ' disabled' : '') + '>购买</button>';
+    } else if (it.daily && it.soldout){
+      btn = '<button class="btn small" disabled>今日已购</button>';
+    } else if (it.seed){
+      btn = '<button class="btn small" data-buy-seed="' + it.seed + '"' + (state.stones < it.price ? ' disabled' : '') + '>购买</button>';
+    } else {
+      btn = '<button class="btn small" data-buy="' + (it.buy || it.name) + '"' + (state.stones < it.price ? ' disabled' : '') + '>购买</button>';
+    }
+    html += '<div class="shop-item">' +
+      '<div class="shop-info"><div class="shop-name">' + it.name + countTag + '</div>' +
+      '<div class="shop-desc">' + it.desc + '</div></div>' +
+      '<div class="shop-right"><div class="shop-price">' + fmt(it.price) + ' 灵石</div>' + btn + '</div>' +
+      '</div>';
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('[data-buy]').forEach(b => {
+    b.onclick = () => buyItem(b.dataset.buy);
+  });
+  list.querySelectorAll('[data-buy-seed]').forEach(b => {
+    b.onclick = () => buySeed(b.dataset.buySeed);
+  });
+  list.querySelectorAll('[data-rod]').forEach(b => {
+    b.onclick = () => buyRod(b.dataset.rod);
+  });
+}
+function render(){
+  fastRender();
+  renderFish();
+  renderGarden();
+  renderHerbs();
+  renderAlchemy();
+  renderShop();
+  renderSign();
+  renderChance();
+  renderGacha();
+  if (logDirty){ renderLog(); logDirty = false; }
+}
+
+/* ================= 存档 ================= */
+// 单一存档键名：导出 / 导入 / 自动保存 / 页面加载 四处共用 SAVE_KEY，严禁改名
+let suppressSave = false; // 导入存档时临时阻止 beforeunload/自动保存覆盖导入数据
+function save(){
+  if (suppressSave) return;
+  state.lastSave = Date.now();
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch(e){}
+}
+function normalizeData(d){
+  if (!d || typeof d !== 'object' || Array.isArray(d)) d = makeDefaultState();
+  d.version = 4;
+  if (typeof d.realm !== 'number' || !isFinite(d.realm) || d.realm < 0 || d.realm >= REALMS.length) d.realm = 0;
+  if (typeof d.layer !== 'number' || !isFinite(d.layer) || d.layer < 1 || d.layer > 9) d.layer = 1;
+  if (typeof d.cultivation !== 'number' || !isFinite(d.cultivation) || d.cultivation < 0) d.cultivation = 0;
+  if (typeof d.stones !== 'number' || !isFinite(d.stones) || d.stones < 0) d.stones = 0;
+  if (typeof d.jade !== 'number' || !isFinite(d.jade) || d.jade < 0) d.jade = 0;
+  if (typeof d.pojingDan !== 'number' || !isFinite(d.pojingDan) || d.pojingDan < 0) d.pojingDan = 0;
+  if (typeof d.daluoxianDan !== 'number' || !isFinite(d.daluoxianDan) || d.daluoxianDan < 0) d.daluoxianDan = 0;
+  if (typeof d.hudaofu !== 'number' || !isFinite(d.hudaofu) || d.hudaofu < 0) d.hudaofu = 0;
+  if (typeof d.wudaoRemain !== 'number' || !isFinite(d.wudaoRemain) || d.wudaoRemain < 0) d.wudaoRemain = 0;
+  // ===== v4 新字段：旧存档缺失时逐项补默认值 =====
+  if (d.zaohuaRemain === undefined || typeof d.zaohuaRemain !== 'number' || !isFinite(d.zaohuaRemain) || d.zaohuaRemain < 0) d.zaohuaRemain = 0;
+  if (d.daluoNextBonus === undefined || typeof d.daluoNextBonus !== 'number' || !isFinite(d.daluoNextBonus) || d.daluoNextBonus < 0) d.daluoNextBonus = 0;
+  d.daluoNextBonus = Math.min(100, d.daluoNextBonus);
+  if (d.lastWudaoBuyDate === undefined || (d.lastWudaoBuyDate !== null && typeof d.lastWudaoBuyDate !== 'string')) d.lastWudaoBuyDate = null;
+  if (d.breakPills === undefined || d.breakPills === null || typeof d.breakPills !== 'object' || Array.isArray(d.breakPills)) d.breakPills = {};
+  REALMS.forEach((r, i) => {
+    const v = d.breakPills[i];
+    if (typeof v !== 'number' || !isFinite(v) || v < 0) d.breakPills[i] = 0;
+    else d.breakPills[i] = Math.floor(v);
+  });
+  // 旧版通用破境丹一次性迁移到“当前境界专属破境丹”，绝不跨境界使用
+  if (d.pojingDan > 0){
+    const moved = Math.floor(d.pojingDan);
+    d.breakPills[d.realm] = (d.breakPills[d.realm] || 0) + moved;
+    d.pojingDan = 0;
+    d._migrateBreakPillsMsg = '旧版破境丹 ×' + moved + ' 已转化为【' + realmBreakName(d.realm) + '】（仅限当前境界使用）';
+  }
+  if (d.juqiUsed === undefined || d.juqiUsed === null || typeof d.juqiUsed !== 'object' || Array.isArray(d.juqiUsed)) d.juqiUsed = {};
+  Object.keys(d.juqiUsed).forEach(k => {
+    const v = d.juqiUsed[k];
+    if (typeof v !== 'number' || !isFinite(v) || v < 0) delete d.juqiUsed[k];
+    else d.juqiUsed[k] = Math.min(5, Math.floor(v));
+  });
+  if (typeof d.xiSuiCount !== 'number' || !isFinite(d.xiSuiCount) || d.xiSuiCount < 0) d.xiSuiCount = 0;
+  d.xiSuiCount = Math.min(20, Math.floor(d.xiSuiCount));
+  // 钓鱼竿迁移：旧版 luckyRod 布尔值 → rods.lucky；v4 新增稀有灵玉鱼竿
+  if (!d.rods || typeof d.rods !== 'object' || Array.isArray(d.rods)) d.rods = {};
+  RODS.forEach(r => {
+    if (typeof d.rods[r.id] !== 'number' || !isFinite(d.rods[r.id]) || d.rods[r.id] < 0) d.rods[r.id] = 0;
+    if (d.rods[r.id] > 1) d.rods[r.id] = 1; // 每种限购1根，历史数据收敛
+  });
+  if (d.luckyRod && !(d.rods.lucky > 0)) d.rods.lucky = 1;
+  if (typeof d.alchemyXP !== 'number' || !isFinite(d.alchemyXP) || d.alchemyXP < 0) d.alchemyXP = 0;
+  if (typeof d.alchemyLevel !== 'number' || !isFinite(d.alchemyLevel) || d.alchemyLevel < 1) d.alchemyLevel = 1;
+  d.alchemyLevel = Math.floor(d.alchemyLevel);
+  // 抽卡
+  if (!d.gacha || typeof d.gacha !== 'object' || Array.isArray(d.gacha)) d.gacha = {};
+  d.gacha.collection = Array.isArray(d.gacha.collection) ? d.gacha.collection.filter(x => typeof x === 'string') : [];
+  d.gacha.bonuses = (d.gacha.bonuses && typeof d.gacha.bonuses === 'object') ? d.gacha.bonuses : {};
+  ['cultivation','breakthrough','fishing','alchemy'].forEach(t => {
+    if (typeof d.gacha.bonuses[t] !== 'number' || !isFinite(d.gacha.bonuses[t]) || d.gacha.bonuses[t] < 0) d.gacha.bonuses[t] = 0;
+  });
+  d.gacha.normal = (d.gacha.normal && typeof d.gacha.normal === 'object') ? d.gacha.normal : {};
+  if (typeof d.gacha.normal.pity !== 'number' || !isFinite(d.gacha.normal.pity) || d.gacha.normal.pity < 0) d.gacha.normal.pity = 0;
+  if (typeof d.gacha.normal.pity2 !== 'number' || !isFinite(d.gacha.normal.pity2) || d.gacha.normal.pity2 < 0) d.gacha.normal.pity2 = 0;
+  d.gacha.normal.pity = Math.floor(d.gacha.normal.pity);
+  d.gacha.normal.pity2 = Math.floor(d.gacha.normal.pity2);
+  d.gacha.normal.lastFreeDate = typeof d.gacha.normal.lastFreeDate === 'string' ? d.gacha.normal.lastFreeDate : null;
+  // v4：高级池新增 120 抽金色稀品保底
+  d.gacha.premium = (d.gacha.premium && typeof d.gacha.premium === 'object') ? d.gacha.premium : {};
+  if (typeof d.gacha.premium.pity !== 'number' || !isFinite(d.gacha.premium.pity) || d.gacha.premium.pity < 0) d.gacha.premium.pity = 0;
+  if (d.gacha.premium.pity2 === undefined || typeof d.gacha.premium.pity2 !== 'number' || !isFinite(d.gacha.premium.pity2) || d.gacha.premium.pity2 < 0) d.gacha.premium.pity2 = 0;
+  d.gacha.premium.pity = Math.floor(d.gacha.premium.pity);
+  d.gacha.premium.pity2 = Math.floor(d.gacha.premium.pity2);
+  d.fishing = !!d.fishing;
+  if (typeof d.fishingProgress !== 'number' || !isFinite(d.fishingProgress) || d.fishingProgress < 0) d.fishingProgress = 0;
+  if (!ROOT_TABLE.some(o => o.name === d.root)) d.root = '双灵根';
+  // 鱼篓
+  d.fish = (d.fish && typeof d.fish === 'object' && !Array.isArray(d.fish)) ? d.fish : {};
+  FISH.forEach(f => { if (typeof d.fish[f.name] !== 'number' || !isFinite(d.fish[f.name]) || d.fish[f.name] < 0) d.fish[f.name] = 0; });
+  // 草药
+  d.herbs = (d.herbs && typeof d.herbs === 'object' && !Array.isArray(d.herbs)) ? d.herbs : {};
+  HERBS.forEach(h => { if (typeof d.herbs[h.name] !== 'number' || !isFinite(d.herbs[h.name]) || d.herbs[h.name] < 0) d.herbs[h.name] = 0; });
+  // 草药种子（本次新增；旧档缺失时赠送 5 颗聚灵草种子）
+  if (d.seeds === undefined || d.seeds === null || typeof d.seeds !== 'object' || Array.isArray(d.seeds)) d.seeds = {};
+  const seedKeys = Object.keys(d.seeds);
+  HERBS.forEach(h => {
+    const v = d.seeds[h.name];
+    if (typeof v !== 'number' || !isFinite(v) || v < 0) d.seeds[h.name] = 0;
+    else d.seeds[h.name] = Math.floor(v);
+  });
+  if (!seedKeys.length) d.seeds['聚灵草'] = (d.seeds['聚灵草'] || 0) + 5;
+  // 丹药背包（v4 新增造化丹、九转洗髓丹；旧版丹药保留）
+  d.dans = (d.dans && typeof d.dans === 'object' && !Array.isArray(d.dans)) ? d.dans : {};
+  ['聚气丹','悟道茶','洗髓丹','九转金丹','大罗仙丹','造化丹','九转洗髓丹'].forEach(n => {
+    if (typeof d.dans[n] !== 'number' || !isFinite(d.dans[n]) || d.dans[n] < 0) d.dans[n] = 0;
+    else d.dans[n] = Math.floor(d.dans[n]);
+  });
+  // 药园
+  if (!Array.isArray(d.garden) || d.garden.length !== 3) d.garden = [null, null, null];
+  d.garden = d.garden.map(p => {
+    if (p && typeof p.type === 'string' && typeof p.plantedAt === 'number' && isFinite(p.plantedAt) && herbByName(p.type)) return {type:p.type, plantedAt:p.plantedAt};
+    return null;
+  });
+  // 炼丹：兼容旧丹方；旧丹方已废弃时退回草药，避免存档卡死
+  d.logs = Array.isArray(d.logs) ? d.logs.filter(e => e && typeof e.m === 'string') : [];
+  if (d.alchemy && (typeof d.alchemy.startedAt !== 'number' || typeof d.alchemy.recipe !== 'string')) d.alchemy = null;
+  if (d.alchemy){
+    if (!d.alchemy.recipeId) d.alchemy.recipeId = (RECIPES.find(r => r.name === d.alchemy.recipe) || {}).id || null;
+    const rec = RECIPES.find(r => r.id === d.alchemy.recipeId) || RECIPES.find(r => r.name === d.alchemy.recipe);
+    if (!rec){
+      const legacyRefund = {'悟道茶/洗髓丹':'九叶莲', '九转金丹':'龙涎草', '大罗仙丹':'九转莲'};
+      const herb = legacyRefund[d.alchemy.recipe];
+      if (herb){
+        d.herbs[herb] = (d.herbs[herb] || 0) + 5;
+        d.logs.push({t: Date.now(), m: '旧丹方【' + d.alchemy.recipe + '】已废弃，退还 5 株【' + herb + '】。'});
+      }
+      d.alchemy = null;
+    } else {
+      d.alchemy.recipe = rec.name;
+      if (typeof d.alchemy.duration !== 'number' || !isFinite(d.alchemy.duration) || d.alchemy.duration <= 0){
+        d.alchemy.duration = Math.max(5, 10 - (d.alchemyLevel - 1) * 5);
+      }
+    }
+  }
+  // 机缘
+  if (typeof d.chanceCount !== 'number' || !isFinite(d.chanceCount) || d.chanceCount < 0 || d.chanceCount > CHANCE_MAX) d.chanceCount = CHANCE_MAX;
+  if (typeof d.lastChanceRefresh !== 'number' || !isFinite(d.lastChanceRefresh)) d.lastChanceRefresh = Date.now();
+  if (typeof d.lastSignDate !== 'string') d.lastSignDate = null;
+  if (typeof d.signStreak !== 'number' || !isFinite(d.signStreak) || d.signStreak < 0) d.signStreak = 0;
+  if (d._migrateBreakPillsMsg){
+    d.logs.push({t: Date.now(), m: d._migrateBreakPillsMsg});
+    delete d._migrateBreakPillsMsg;
+  }
+  if (d.logs.length > 300) d.logs.splice(0, d.logs.length - 300);
+  d.lastSave = (typeof d.lastSave === 'number' && isFinite(d.lastSave)) ? d.lastSave : Date.now();
+  return d;
+}
+function normalizeState(){
+  normalizeData(state);
+}
+function makeDefaultState(){
+  const s = {
+    version: 4, realm: 0, layer: 1, cultivation: 0, stones: 0, jade: 0,
+    root: '双灵根', xiSuiCount: 0,
+    fish: {}, herbs: {}, seeds: {}, dans: {},
+    pojingDan: 0, breakPills: {}, daluoxianDan: 0, hudaofu: 0, wudaoRemain: 0,
+    zaohuaRemain: 0, daluoNextBonus: 0, juqiUsed: {}, lastWudaoBuyDate: null,
+    rods: {lucky:0, silver:0, gold:0, myth:0, jade:0, rarejade:0}, alchemyXP:0, alchemyLevel:1,
+    fishing: false, fishingProgress: 0,
+    garden: [null, null, null], alchemy: null,
+    gacha: {collection:[], bonuses:{cultivation:0,breakthrough:0,fishing:0,alchemy:0}, normal:{pity:0,pity2:0,lastFreeDate:null}, premium:{pity:0,pity2:0}},
+    chanceCount: CHANCE_MAX, lastChanceRefresh: Date.now(),
+    lastSignDate: null, signStreak: 0,
+    lastSave: Date.now(), logs: []
+  };
+  FISH.forEach(f => s.fish[f.name] = 0);
+  HERBS.forEach(h => s.herbs[h.name] = 0);
+  HERBS.forEach(h => s.seeds[h.name] = 0);
+  s.seeds['聚灵草'] = 5;
+  ['聚气丹','悟道茶','洗髓丹','九转金丹','大罗仙丹','造化丹','九转洗髓丹'].forEach(n => s.dans[n] = 0);
+  REALMS.forEach((r, i) => s.breakPills[i] = 0);
+  return s;
+}
+function fillDefaults(data){
+  // 用默认新手号打底，再用导入数据覆盖，最后统一修复字段类型，兼容旧存档
+  const d = makeDefaultState();
+  if (data && typeof data === 'object' && !Array.isArray(data)){
+    for (const k in data){ if (data[k] !== undefined) d[k] = data[k]; }
+  }
+  return normalizeData(d);
+}
+function backupCorruptSave(raw){
+  // 读取失败时保留原始存档，避免新档自动保存后覆盖掉可人工恢复的数据
+  try {
+    if (raw) localStorage.setItem(SAVE_KEY + '_corrupt_backup', raw);
+  } catch(e){}
+}
+function offlineCultivationGain(seconds){
+  // 离线收益按时间分段结算：悟道茶×2、造化丹×3、图鉴修炼加成都要生效，避免 buff 被离线白白消耗
+  const base = getBaseIncome() * rootInfo().speed * (1 + gachaBonus('cultivation') / 100);
+  const wEnd = Math.min(seconds, Math.max(0, state.wudaoRemain || 0));
+  const zEnd = Math.min(seconds, Math.max(0, state.zaohuaRemain || 0));
+  const points = Array.from(new Set([0, wEnd, zEnd, seconds])).sort((a, b) => a - b);
+  let gain = 0;
+  for (let i = 0; i < points.length - 1; i++){
+    const from = points[i], to = points[i + 1];
+    if (to <= from) continue;
+    let mult = 1;
+    if (from < wEnd) mult *= 2;
+    if (from < zEnd) mult *= 3;
+    gain += base * (to - from) * mult;
+  }
+  return gain;
+}
+function load(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    if (!s || typeof s !== 'object' || Array.isArray(s)){
+      console.warn('存档格式异常，已忽略。');
+      backupCorruptSave(raw);
+      return false;
+    }
+    console.log('加载到的存档:', s);
+    Object.assign(state, s);
+    normalizeState();
+    // 离线结算（最多 8 小时）
+    const now = Date.now();
+    let offline = (now - (state.lastSave || now)) / 1000;
+    if (offline > 0){
+      const capped = Math.min(offline, 8 * 3600);
+      // 修为（含离线期间生效的悟道茶/造化丹/图鉴加成）
+      const gain = offlineCultivationGain(capped);
+      state.cultivation += gain;
+      state.wudaoRemain = Math.max(0, state.wudaoRemain - capped);
+      state.zaohuaRemain = Math.max(0, state.zaohuaRemain - capped);
+      if (capped > 10) log('离线修炼 ' + fmtDur(capped) + '，获得 ' + fmt(gain) + ' 修为');
+      // 钓鱼
+      if (state.fishing){
+        const totalProg = (state.fishingProgress || 0) + capped;
+        const fishCount = Math.floor(totalProg / 10);
+        if (fishCount > 0){
+          const tally = {};
+          for (let i = 0; i < fishCount; i++){
+            const f = rollFish();
+            addFish(f);
+            tally[f] = (tally[f] || 0) + 1;
+          }
+          const summary = Object.keys(tally).map(k => k + '×' + tally[k]).join('、');
+          log('离线垂钓收获 ' + fishCount + ' 条鱼（' + summary + '）');
+        }
+        state.fishingProgress = totalProg % 10;
+      }
+    }
+    state.lastSave = now;
+    return true;
+  } catch(e){
+    let raw = null;
+    try { raw = localStorage.getItem(SAVE_KEY); } catch(_e){}
+    backupCorruptSave(raw);
+    console.error('读取存档失败，按新档继续（原始数据已备份到 ' + SAVE_KEY + '_corrupt_backup）:', e);
+    return false;
+  }
+}
+
+/* ================= 存档导出 / 导入 ================= */
+function b64encode(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+function b64decode(str){
+  return decodeURIComponent(escape(atob(str)));
+}
+function openModal(title, bodyHTML, footerHTML){
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modal-footer').innerHTML = footerHTML;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  const tip = document.getElementById('gachaTip');
+  if (tip) tip.classList.remove('show');
+}
+
+/* ================= 商店 / 机缘底部抽屉 ================= */
+let sheetState = null;
+const SHEET_INFO = {
+  shop:  {title:'商店',  sub:'丹药 · 种子 · 鱼竿 · 签到'},
+  chance:{title:'机缘',  sub:'随机事件 · 每小时刷新 3 次'}
+};
+function openSheet(name, opts){
+  const sec = document.getElementById('tab-' + name);
+  const sheet = document.getElementById('sheet');
+  const body = document.getElementById('sheetBody');
+  if (!sec || !sheet || !body) return;
+  closeSheet();
+  const info = SHEET_INFO[name] || SHEET_INFO.shop;
+  const focusSeeds = !!(opts && opts.seed) && name === 'shop';
+  sheetState = {name:name, sec:sec, parent:sec.parentNode, next:sec.nextSibling};
+  body.appendChild(sec);
+  document.getElementById('sheetTitle').textContent = info.title;
+  document.getElementById('sheetSub').textContent = focusSeeds ? '草药种子 · 种在药园，成熟后收获' : info.sub;
+  sheet.classList.add('open');
+  sheet.setAttribute('aria-hidden', 'false');
+  if (name === 'shop'){
+    renderShop();
+    renderSign();
+    if (focusSeeds){
+      setTimeout(() => {
+        const head = body.querySelector('[data-seed-head]');
+        if (head) body.scrollTop = Math.max(0, body.scrollTop + head.getBoundingClientRect().top - body.getBoundingClientRect().top - 8);
+      }, 40);
+    }
+  } else if (name === 'chance'){
+    renderChance();
+  }
+}
+function closeSheet(){
+  const sheet = document.getElementById('sheet');
+  if (!sheet || !sheet.classList.contains('open')) return;
+  if (sheetState){
+    const st = sheetState;
+    if (st.next && st.next.parentNode === st.parent) st.parent.insertBefore(st.sec, st.next);
+    else if (st.parent) st.parent.appendChild(st.sec);
+    sheetState = null;
+  }
+  sheet.classList.remove('open');
+  sheet.setAttribute('aria-hidden', 'true');
+}
+function exportSave(){
+  save();
+  const raw = localStorage.getItem(SAVE_KEY) || JSON.stringify(state);
+  let b64;
+  try { b64 = b64encode(raw); } catch(e){ alert('导出失败：' + e.message); return; }
+  openModal('导出存档',
+    '<textarea id="exportText" readonly></textarea>' +
+    '<p class="hint">复制下方内容，到其他设备的【导入存档】中粘贴即可恢复进度（含药园、草药、丹药等全部数据）。</p>',
+    '<button class="btn" onclick="closeModal()">关闭</button>' +
+    '<button class="btn primary" id="copyBtn" onclick="copyExport()">复制</button>');
+  document.getElementById('exportText').value = b64;
+}
+function copyExport(){
+  const ta = document.getElementById('exportText');
+  if (!ta) return;
+  const btn = document.getElementById('copyBtn');
+  const mark = (txt) => {
+    if (btn) btn.textContent = txt;
+    setTimeout(() => { if (btn) btn.textContent = '复制'; }, 1500);
+  };
+  ta.focus();
+  ta.select();
+  ta.setSelectionRange(0, ta.value.length);
+  const fallback = () => {
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch(e){ ok = false; }
+    mark(ok ? '已复制' : '复制失败');
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(() => mark('已复制'), fallback);
+  } else {
+    fallback();
+  }
+}
+function openImport(){
+  openModal('导入存档',
+    '<textarea id="importText" placeholder="在此粘贴导出的 Base64 存档字符串……"></textarea>',
+    '<button class="btn" onclick="closeModal()">取消</button>' +
+    '<button class="btn primary" onclick="doImport()">确认导入</button>');
+  document.getElementById('importText').focus();
+}
+function doImport(){
+  const ta = document.getElementById('importText');
+  if (!ta) return;
+  const raw = ta.value.trim();
+  if (!raw){ alert('请先粘贴存档内容'); return; }
+
+  // 1) Base64 解码
+  let json;
+  try {
+    json = b64decode(raw);
+  } catch(e){
+    console.error('导入失败：Base64 解码失败', e);
+    alert('Base64解码失败，请检查存档内容是否完整');
+    return;
+  }
+
+  // 2) JSON 解析
+  let data;
+  try {
+    data = JSON.parse(json);
+  } catch(e){
+    console.error('导入失败：JSON 格式错误', e);
+    alert('JSON格式错误，请检查存档内容');
+    return;
+  }
+
+  // 3) 基本结构校验
+  if (!data || typeof data !== 'object' || Array.isArray(data)){
+    alert('存档格式错误：数据不是有效的对象');
+    return;
+  }
+  if (typeof data.realm !== 'number' || typeof data.layer !== 'number' || typeof data.cultivation !== 'number'){
+    alert('存档格式错误：缺少必要字段（realm/layer/cultivation）');
+    return;
+  }
+
+  // 4) 旧存档兼容：补全缺失的新字段（机缘次数、药园、草药、丹药等）
+  const parsedData = fillDefaults(data);
+
+  alert('解析成功，正在覆盖存档...');
+  console.log('正在写入的存档:', parsedData);
+  console.log('使用的存档键名:', SAVE_KEY);
+
+  // 5) 写入并阻止 beforeunload/自动保存覆盖导入的数据
+  suppressSave = true;
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(parsedData));
+  } catch(e){
+    suppressSave = false;
+    alert('写入失败：' + e.message);
+    return;
+  }
+  location.reload();
+}
+
+/* ================= 游戏说明 ================= */
+const HELP_HTML =
+  '<div class="help-box">' +
+    '<div class="help-sec"><div class="help-title">灵根概率</div>' +
+      '<div class="help-row">天灵根（5%）：修炼速度 +50%，突破成功率 +5%</div>' +
+      '<div class="help-row">变异灵根（15%）：修炼速度 +30%</div>' +
+      '<div class="help-row">双灵根（30%）：修炼速度 +10%</div>' +
+      '<div class="help-row">伪灵根（50%）：修炼速度 -10%</div>' +
+      '<div class="help-row">洗灵根：每次服用洗髓丹/九转洗髓丹都会累计保底，第 20 次必出天灵根；自然洗出天灵根会重置进度。</div>' +
+    '</div>' +
+    '<div class="help-sec"><div class="help-title">突破机制</div>' +
+      '<div class="help-row">所需修为 = 基础修为 × 1.5^(境界等级-1)；成功率 = 基础(75%/渡劫50%) - 境界等级×0.5%，最低 10%。</div>' +
+      '<div class="help-row">点击【突破】会打开破境丹选择窗：只列出当前境界可用的破境丹，每枚 +15%，勾选数量不限；达到或超过 100% 时强制显示 100%，剩余丹药自动置灰。</div>' +
+      '<div class="help-row">破境丹严格绑定境界，炼气破境丹不能用于筑基突破。所有丹药必须手动使用，不会自动消耗。</div>' +
+      '<div class="help-row">突破失败：损失当前修为的 20%；渡劫失败额外掉落一个小境界（护道符可免除掉落）。</div>' +
+      '<div class="help-row">修为可溢出上限继续累积，但溢出后获取速度减半。</div>' +
+    '</div>' +
+    '<div class="help-sec"><div class="help-title">灵玉与签到</div>' +
+      '<div class="help-row">灵玉来源：每日签到（每天基础 +2，第3/5/7天额外 +3/+5/+7）、机缘 5%、钓鱼灵玉鱼/龙鳞鱼、高级草药收获 5%。</div>' +
+      '<div class="help-row">签到每天给 2 灵玉 + 1~3 万灵石（随机），断签重新计数。</div>' +
+    '</div>' +
+    '<div class="help-sec"><div class="help-title">钓鱼概率</div>' +
+      '<div class="help-row">青鱼 50% · 草鱼 30% · 锦鲤 15% · 灵鲫 4% · 金鳞鱼 0.8% · 龙鱼 0.2% · 五彩神鱼 0.01% · 灵玉鱼 0.5%（灵玉）· 龙鳞鱼 0.001%（灵玉）</div>' +
+      '<div class="help-row">鱼竿加法叠加，每种限购 1 根：倍率 = 1 + 已购鱼竿加成之和。灵玉鱼竿（200万灵石）+0.5%；稀有灵玉鱼竿（1000万灵石，限购1根）灵玉鱼概率额外 +1%。</div>' +
+      '<div class="help-row">一键出售常规鱼绝不会出售灵玉鱼和龙鳞鱼，可放心使用。</div>' +
+    '</div>' +
+    '<div class="help-sec"><div class="help-title">药园与炼丹</div>' +
+      '<div class="help-row">聚灵草 5 分钟 · 玄元花 30 分钟 · 九叶莲 2 小时 · 龙涎草 6 小时（卖3000灵石）· 九转莲 8 小时（卖8000灵石）。</div>' +
+      '<div class="help-row">种植消耗 1 颗对应种子；商店种子价格为草药售价的 1/5。新号赠送 5 颗聚灵草种子。</div>' +
+      '<div class="help-row">5 聚灵草→聚气丹（当前境界上限 10% 修为，每小境界限 5 颗）· 5 玄元花→当前境界破境丹 · 5 龙涎草→造化丹（2 小时修炼×3）· 5 九转莲→九转洗髓丹。</div>' +
+      '<div class="help-row">洗髓丹与悟道茶只能通过商店购买，炼丹绝不会产出。炼丹需等待倒计时，成功/炸炉都会有悬浮提示并写入底部日志。</div>' +
+      '<div class="help-row">药园生长中的格子可点【取消种植】拔除，确认后不返还材料并恢复空地。</div>' +
+    '</div>' +
+    '<div class="help-sec"><div class="help-title">抽卡</div>' +
+      '<div class="help-row">普通灵石池（1万/抽，每日免费一抽）：普通89% · 优品10% · 极品1%，60抽保底优品、120抽保底极品。</div>' +
+      '<div class="help-row">高级灵玉池（5灵玉/抽，十连50灵玉）：普通69.4% · 优品25% · 极品5% · 金色稀品0.6%；60抽保底极品，120抽保底金色稀品，进度条实时显示。</div>' +
+      '<div class="help-row">法器加修炼速度、古籍加突破率、特殊物品加钓鱼/炼丹概率；先天灵宝提供大量加成。重复自动转化货币。点击【概率与图鉴】查看池子概率、全部物品并按品阶着色，未获得灰显。</div>' +
+    '</div>' +
+    '<div class="help-sec"><div class="help-title">离线收益</div>' +
+      '<div class="help-row">离线挂机最多可累计 8 小时的修为收益与钓鱼收获；药园按时间戳照常生长。</div>' +
+    '</div>' +
+    '<div class="help-sec"><div class="help-title">存档提示</div>' +
+      '<div class="help-row">本游戏使用本地存档。请在【商店 → 存档管理】使用「导出存档」进行备份，换设备时用「导入存档」恢复进度。</div>' +
+    '</div>' +
+  '</div>';
+function openHelp(){
+  openModal('游戏说明', HELP_HTML, '<button class="btn primary" onclick="closeModal()">知道了</button>');
+}
+
+/* ================= 主循环 ================= */
+function tick(){
+  const now = Date.now();
+  let dt = (now - lastTick) / 1000;
+  lastTick = now;
+  if (dt < 0) dt = 0;
+  if (dt > 5) dt = 5;
+
+  if (state.wudaoRemain > 0) state.wudaoRemain = Math.max(0, state.wudaoRemain - dt);
+  if (state.zaohuaRemain > 0) state.zaohuaRemain = Math.max(0, state.zaohuaRemain - dt);
+  state.cultivation += getIncome() * dt;
+
+  if (state.fishing){
+    state.fishingProgress += dt;
+    while (state.fishingProgress >= 10){
+      state.fishingProgress -= 10;
+      catchFish();
+    }
+  }
+
+  tickAlchemy();
+  refreshChances();
+
+  const sec = Math.floor(now / 1000);
+  if (sec !== lastSecond){ lastSecond = sec; renderGarden(); }
+
+  fastRender();
+}
+
+/* ================= 初始化 ================= */
+function init(){
+  const isNew = !load();
+  if (isNew){
+    state.root = rollRoot();
+    state.lastSave = Date.now();
+    log('踏入修仙之路，觉醒灵根：【' + state.root + '】');
+    log('点击【突破】提升境界，前往【钓鱼】赚取灵石，在【药园】种药、【丹房】炼丹。');
+    save();
+  } else {
+    log('云游归来，继续修行。');
+  }
+  normalizeState(); // 新老存档统一走安全补全，避免旧档缺字段白屏
+  tickAlchemy(); // 结算离线期间已完成的炼丹
+  refreshChances(); // 结算离线期间的机缘刷新
+
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.onclick = () => switchTab(b.dataset.tab);
+  });
+  function switchTab(name){
+    // 商店与机缘改为底部抽屉，打开时保留当前页面，不打断操作
+    if (name === 'shop' || name === 'chance'){ openSheet(name); return; }
+    document.querySelectorAll('.nav-btn').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+    const topStats = document.getElementById('topStats');
+    if (topStats) topStats.classList.toggle('hide-top-bar', name !== 'cultivate');
+    render();
+  }
+
+  document.getElementById('breakBtn').onclick = openBreakthroughModal;
+  document.getElementById('quickChanceBtn').onclick = () => openSheet('chance');
+  document.getElementById('quickShopBtn').onclick = () => openSheet('shop');
+  document.getElementById('gardenShopBtn').onclick = () => openSheet('shop', {seed:true});
+  document.getElementById('gachaInfoBtn').onclick = () => openGachaInfo();
+  document.getElementById('gachaCollectionBtn').onclick = () => openGachaInfo();
+  document.getElementById('sheetCloseBtn').onclick = closeSheet;
+  document.getElementById('sheet').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('sheet')) closeSheet();
+  });
+  document.getElementById('fishBtn').onclick = () => {
+    state.fishing = !state.fishing;
+    if (state.fishing){ state.fishingProgress = 0; log('开始垂钓……每 10 秒收获一条鱼。'); }
+    else log('收竿，停止钓鱼。');
+    render();
+  };
+  document.getElementById('sellAllBtn').onclick = sellAllRegularFish;
+  document.getElementById('shopSellFishBtn').onclick = sellAllRegularFish;
+  document.getElementById('sellAllHerbsBtn').onclick = sellAllHerbs;
+  document.getElementById('chanceBtn').onclick = triggerChance;
+  document.getElementById('signBtn').onclick = openSignModal;
+  document.getElementById('helpBtn').onclick = openHelp;
+  document.getElementById('resetBtn').onclick = () => {
+    if (confirm('确定要重置存档，重新开始修行吗？')){
+      localStorage.removeItem(SAVE_KEY);
+      location.reload();
+    }
+  };
+  document.getElementById('exportBtn').onclick = exportSave;
+  document.getElementById('importBtn').onclick = openImport;
+  document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('modal')){
+      if (currentBattle) currentBattle = null;
+      closeModal();
+    }
+  });
+  // 图鉴气泡：点击气泡以外或其它物品时自动消失
+  document.addEventListener('click', (e) => {
+    const tip = document.getElementById('gachaTip');
+    if (tip && tip.classList.contains('show') && !tip.contains(e.target) && !(e.target.closest && e.target.closest('.gacha-item'))){
+      tip.classList.remove('show');
+    }
+  });
+
+  render();
+  lastTick = Date.now();
+  setInterval(tick, 100);
+  setInterval(save, 5000);
+  window.addEventListener('beforeunload', save);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+
+  if (!hasSignedToday()) openSignModal(); // 当日未签到时自动弹窗签到
+}
+
+init();
+</script>
+</body>
+</html>
